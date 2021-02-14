@@ -1,0 +1,42 @@
+version: 2.1
+
+executors:
+  clang:
+    environment:
+      CC: clang
+      CXX: clang++
+      CXXFLAGS: "-stdlib=libc++"
+      LD_FLAGS: "-stdlib=libc++"
+  gcc:
+    environment:
+      CC: gcc-10
+      CXX: g++-10
+
+jobs:
+  build:
+    parameters:
+      compiler:
+        type: executor
+      variant:
+        type: string
+    executor: << parameters.compiler >>
+    steps:
+      - checkout
+      - run:
+          name: cmake
+          command: cmake -G Ninja -S .circleci -B .circleci -DCMAKE_BUILD_TYPE=<< parameters.variant >> $CMAKE_EXTRA
+      - run:
+          name: ninja
+          command: ninja -j1 -C .circleci
+      - run:
+          name: check tests
+          command: ninja -j1 -C .circleci check
+
+workflows:
+  all-tests:
+    jobs:
+      - build:
+          matrix:
+            parameters:
+              compiler: [gcc, clang]
+              variant: [Debug, Release]
