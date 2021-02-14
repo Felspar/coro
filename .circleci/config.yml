@@ -2,12 +2,16 @@ version: 2.1
 
 executors:
   clang:
+    docker:
+    - image: fost/circleci
     environment:
       CC: clang
       CXX: clang++
       CXXFLAGS: "-stdlib=libc++"
       LD_FLAGS: "-stdlib=libc++"
   gcc:
+    docker:
+    - image: fost/circleci
     environment:
       CC: gcc-10
       CXX: g++-10
