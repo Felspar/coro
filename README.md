@@ -1,4 +1,4 @@
-# Makham
+# Felspar Coro
 
 **C++ coroutine library and toolkit**
 
@@ -10,9 +10,9 @@ Used to turn a coroutine that `co_yield`s values into an iterator that works wit
 Generators can be used from normal functions, not just coroutines. A generator coroutine is restricted to only using `co_yield` and not `co_return`ing any value.
 
 
-## `felspar::coro::lazy`
+## `felspar::coro::task`
 
-A basic lazily evaluated coroutine. Superficially very similar to a nullary lambda, but with an "only once" execution guarantee. The coroutine can be evaluated from either a normal function or a coroutine, and it's value is returned as if it was a nullary lambda using `operator()()`.
+A coroutine whose result must be awaited. Like the `lazy`, the coroutine is not started until the return value is `co_awaited`.
 
 
 ## `felspar::coro::stream`
@@ -33,6 +33,6 @@ felspar::coro::stream<int> doubler(felspar::coro::stream<int> in) {
 ```
 
 
-## `felspar::coro::task`
+## `felspar::coro::lazy`
 
-A coroutine whose result must be awaited. Like the `lazy`, the coroutine is not started until the return value is `co_awaited`.
+A basic lazily evaluated coroutine. Superficially very similar to a nullary lambda, but with an "only once" execution guarantee. The coroutine can be evaluated from either a normal function or a coroutine, and it's value is returned as if it was a nullary lambda using `operator()()`.
