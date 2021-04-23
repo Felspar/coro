@@ -19,6 +19,8 @@ namespace felspar::coro {
     struct generator_promise;
 
 
+    /// A coroutine generator. Maybe iterated (`begin`/`end`) or values may be
+    /// fetched (`next`), but not both.
     template<typename Y>
     class generator final {
         friend struct generator_promise<Y>;
@@ -85,6 +87,15 @@ namespace felspar::coro {
         };
         auto begin() { return iterator{this}; }
         auto end() { return iterator{}; }
+
+        /// Fetching values. Returns an empty `optional` when completed.
+        std::optional<Y> next() {
+            coro.resume();
+            if (coro.promise().eptr) {
+                std::rethrow_exception(coro.promise().eptr);
+            }
+            return std::exchange(coro.promise().value, {});
+        }
     };
 
 

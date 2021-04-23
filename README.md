@@ -7,7 +7,25 @@
 
 Used to turn a coroutine that `co_yield`s values into an iterator that works with ranged `for` loops.
 
+```cpp
+std::vector<std::size_t> fibs{};
+for (auto f : take(10, fib())) { fibs.push_back(f); }
+check(fibs.size()) == 10u;
+check(fibs.front()) == 1u;
+check(fibs.back()) == 55u;
+```
+
 Generators can be used from normal functions, not just coroutines. A generator coroutine is restricted to only using `co_yield` and not `co_return`ing any value.
+
+As well as supporting iteration, the use of `next()` directly on the generator is also supported (providing the same API structure as `stream`, but **without** the requirement to `co_await` the resulting values). This may provide a simpler API for cases where multiple generators are required to be used together.
+
+```cpp
+auto t = take(3, fib());
+check(t.next()) == 1u;
+check(t.next()) == 1u;
+check(t.next()) == 2u;
+check(t.next()).is_falsey();
+```
 
 
 ## `felspar::coro::task`

@@ -1,2 +1,5 @@
+2021-04-23  Kirit Sælensminde  <kirit@felspar.com>
+ Add `next()` to `generator`.
+
 2021-02-14  Kirit Sælensminde  <kirit@felspar.com>
  Public release.

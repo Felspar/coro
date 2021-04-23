@@ -39,8 +39,8 @@ namespace {
     }
 
 
-    auto const g =
-            felspar::testsuite("generator")
+    auto const gi =
+            felspar::testsuite("generator/iteration")
                     .test("empty",
                           [](auto check) {
                               auto e = empty();
@@ -81,6 +81,56 @@ namespace {
                         check(fibs.size()) == 10u;
                         check(fibs.front()) == 1u;
                         check(fibs.back()) == 55u;
+                    });
+
+
+    auto const gn =
+            felspar::testsuite("generator/next")
+                    .test("empty",
+                          [](auto check) {
+                              auto e = empty();
+                              check(e.next()).is_falsey();
+                          })
+                    .test("fibonacci",
+                          [](auto check) {
+                              auto f = fib();
+                              check(f.next()) == 1u;
+                              check(f.next()) == 1u;
+                              check(f.next()) == 2u;
+                              check(f.next()) == 3u;
+                              check(f.next()) == 5u;
+                              check(f.next()) == 8u;
+                          })
+                    .test("throws early",
+                          [](auto check) {
+                              auto f = thrower(false);
+                              check([&]() { f.next(); })
+                                      .throws(std::runtime_error{
+                                              "Ooops, something went wrong"});
+                          })
+                    .test("throws late",
+                          [](auto check) {
+                              auto f = thrower(true);
+                              check(f.next()) == 1u;
+                              check([&]() { f.next(); })
+                                      .throws(std::runtime_error{
+                                              "Ooops, something went wrong "
+                                              "after "
+                                              "yield"});
+                          })
+                    .test("terminates", [](auto check) {
+                        auto t = take(10, fib());
+                        check(t.next()) == 1u;
+                        check(t.next()) == 1u;
+                        check(t.next()) == 2u;
+                        check(t.next()) == 3u;
+                        check(t.next()) == 5u;
+                        check(t.next()) == 8u;
+                        check(t.next()) == 13u;
+                        check(t.next()) == 21u;
+                        check(t.next()) == 34u;
+                        check(t.next()) == 55u;
+                        check(t.next()).is_falsey();
                     });
 
 
