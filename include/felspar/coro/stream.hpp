@@ -2,8 +2,7 @@
 
 
 #include <felspar/coro/coroutine.hpp>
-
-#include <optional>
+#include <felspar/memory/holding_pen.hpp>
 
 
 namespace felspar::coro {
@@ -42,11 +41,12 @@ namespace felspar::coro {
                     yielding_coro.promise().continuation = awaiting;
                     return yielding_coro.get();
                 }
-                std::optional<Y> await_resume() {
+                memory::holding_pen<Y> await_resume() {
                     if (auto eptr = yielding_coro.promise().eptr) {
                         std::rethrow_exception(eptr);
                     } else {
-                        return std::exchange(yielding_coro.promise().value, {});
+                        return std::move(yielding_coro.promise().value)
+                                .transfer_out();
                     }
                 }
             };
@@ -59,13 +59,13 @@ namespace felspar::coro {
     struct stream_promise {
         coroutine_handle<> continuation = {};
         bool completed = false;
-        std::optional<Y> value = {};
+        memory::holding_pen<Y> value = {};
         std::exception_ptr eptr = {};
 
         using handle_type = unique_handle<stream_promise>;
 
         auto yield_value(Y y) {
-            value = std::move(y);
+            value.assign(std::move(y));
             return symmetric_continuation{std::exchange(continuation, {})};
         }
 
@@ -73,7 +73,7 @@ namespace felspar::coro {
 
         auto return_void() {
             completed = true;
-            value = {};
+            value.reset();
             return suspend_never{};
         }
 

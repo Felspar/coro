@@ -16,6 +16,7 @@ elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 else()
     message(SEND_ERROR "Unknown compiler ID: ${CMAKE_CXX_COMPILER_ID}")
 endif()
+target_link_libraries(felspar-coro INTERFACE felspar-memory)
 install(DIRECTORY include/felspar DESTINATION include)
 
 if(TARGET check)
