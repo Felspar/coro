@@ -36,13 +36,6 @@ namespace felspar::coro {
         /// asynchronous mechanism to destroy the coroutine.
         ~task() = default;
 
-        void start() {
-            if (not started) {
-                started = true;
-                coro.resume();
-            }
-        }
-
         /// Coroutine and awaitable
         auto operator co_await() & = delete;
         auto operator co_await() && {
@@ -83,7 +76,15 @@ namespace felspar::coro {
       private:
         handle_type coro;
         bool started = false;
+
         explicit task(handle_type h) : coro{std::move(h)} {}
+
+        void start() {
+            if (not started) {
+                started = true;
+                coro.resume();
+            }
+        }
     };
 
 
