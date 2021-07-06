@@ -19,7 +19,9 @@ namespace felspar::coro {
         friend struct task_promise<Y>;
 
       public:
-        using handle_type = typename task_promise<Y>::handle_type;
+        using value_type = Y;
+        using promise_type = task_promise<value_type>;
+        using handle_type = typename promise_type::handle_type;
 
         /// Not copyable
         task(task const &) = delete;
@@ -42,8 +44,6 @@ namespace felspar::coro {
         }
 
         /// Coroutine and awaitable
-        using promise_type = task_promise<Y>;
-
         auto operator co_await() & = delete;
         auto operator co_await() && {
             struct awaitable {
@@ -65,8 +65,8 @@ namespace felspar::coro {
         }
 
         /// Or use this from a normal function
-        Y get() & = delete;
-        Y get() && {
+        value_type get() & = delete;
+        value_type get() && {
             if (not coro) {
                 throw std::runtime_error{"No coroutine to resume"};
             }
@@ -101,6 +101,7 @@ namespace felspar::coro {
     };
     template<>
     struct task_promise<void> : public task_promise_base {
+        using value_type = void;
         using handle_type = unique_handle<task_promise<void>>;
         auto get_return_object() {
             return task<void>{handle_type::from_promise(*this)};
@@ -109,18 +110,19 @@ namespace felspar::coro {
     };
     template<typename Y>
     struct task_promise : public task_promise_base {
+        using value_type = Y;
         using handle_type = unique_handle<task_promise<Y>>;
-        std::optional<Y> value = {};
+        std::optional<value_type> value = {};
         auto get_return_object() {
-            return task<Y>{handle_type::from_promise(*this)};
+            return task<value_type>{handle_type::from_promise(*this)};
         }
-        void return_value(Y y) { value = std::move(y); }
-        Y consume_value() {
+        void return_value(value_type y) { value = std::move(y); }
+        value_type consume_value() {
             task_promise_base::consume_value();
             if (not value.has_value()) {
                 throw std::runtime_error("The task doesn't have a value");
             }
-            Y rv = std::move(*value);
+            value_type rv = std::move(*value);
             value.reset();
             return rv;
         }
