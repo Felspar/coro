@@ -23,6 +23,9 @@ namespace felspar::coro {
         using promise_type = task_promise<value_type>;
         using handle_type = typename promise_type::handle_type;
 
+        /// Construct a new task from a previously released one
+        explicit task(handle_type h) : coro{std::move(h)} {}
+
         /// Not copyable
         task(task const &) = delete;
         task &operator=(task const &) = delete;
@@ -76,8 +79,6 @@ namespace felspar::coro {
       private:
         handle_type coro;
         bool started = false;
-
-        explicit task(handle_type h) : coro{std::move(h)} {}
 
         void start() {
             if (not started) {
