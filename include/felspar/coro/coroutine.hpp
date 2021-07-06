@@ -80,11 +80,11 @@ namespace felspar::coro {
 
         /// Comparison
         template<typename T>
-        bool operator==(unique_handle<T> c) {
+        bool operator==(unique_handle<T> c) const {
             return get() == c.get();
         }
         template<typename T>
-        bool operator==(coroutine_handle<T> c) {
+        bool operator==(coroutine_handle<T> c) const {
             return get() == c;
         }
 
