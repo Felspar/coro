@@ -51,10 +51,17 @@ namespace felspar::coro {
 namespace felspar::coro {
 
 
+    /// A type erased base type for the `unique_handle`
+    struct unique_handle_base {
+        virtual ~unique_handle_base() = default;
+        virtual bool done() const noexcept = 0;
+    };
+
+
     /// A wrapper around `coroutine_handle<P>` that manages the handle, calling
     /// `destroy` on it when done.
     template<typename P = void>
-    class unique_handle {
+    class unique_handle final : public unique_handle_base {
         coroutine_handle<P> handle = {};
         explicit unique_handle(coroutine_handle<P> h) : handle{h} {}
 
@@ -94,7 +101,7 @@ namespace felspar::coro {
 
         /// Forwarders for `coroutine_handle<P>` members
         explicit operator bool() const noexcept { return bool{handle}; }
-        decltype(auto) done() const noexcept { return handle.done(); }
+        bool done() const noexcept { return handle.done(); }
         template<typename PP>
         static auto from_promise(PP &&pp) noexcept {
             return unique_handle{
