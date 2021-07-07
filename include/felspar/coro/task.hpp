@@ -11,7 +11,60 @@ namespace felspar::coro {
 
 
     template<typename Y>
+    class task;
+    template<typename Y>
     struct task_promise;
+
+
+    struct task_promise_base {
+        /// Flag to ensure the coroutine is started at appropriate points in time
+        bool started = false;
+        /// Any caught exception that needs to be re-thrown is captured here
+        std::exception_ptr eptr = {};
+        void check_exception() {
+            if (eptr) { std::rethrow_exception(eptr); }
+        }
+        /// The continuation that is to run when the task is complete
+        coroutine_handle<> continuation = {};
+
+        auto initial_suspend() const noexcept { return suspend_always{}; }
+        void unhandled_exception() noexcept { eptr = std::current_exception(); }
+        auto final_suspend() noexcept {
+            return symmetric_continuation{continuation};
+        }
+    };
+    template<>
+    struct task_promise<void> final : public task_promise_base {
+        bool has_value = false;
+        using value_type = void;
+        using handle_type = unique_handle<task_promise<void>>;
+        task<void> get_return_object();
+        void return_void() noexcept { has_value = true; }
+        void consume_value() {
+            check_exception();
+            if (not has_value) {
+                throw std::runtime_error{"The task hasn't completed"};
+            }
+        }
+    };
+    template<typename Y>
+    struct task_promise final : public task_promise_base {
+        using value_type = Y;
+        using handle_type = unique_handle<task_promise<Y>>;
+        std::optional<value_type> value = {};
+        task<value_type> get_return_object();
+        void return_value(value_type y) { value = std::move(y); }
+        value_type consume_value() {
+            check_exception();
+            if (not value.has_value()) {
+                throw std::runtime_error{
+                        "The task hasn't completed with a value"};
+            }
+            value_type rv = std::move(*value);
+            value.reset();
+            return rv;
+        }
+    };
 
 
     template<typename Y>
@@ -43,21 +96,21 @@ namespace felspar::coro {
         auto operator co_await() & = delete;
         auto operator co_await() && {
             struct awaitable {
-                task &t;
+                handle_type coro;
                 bool await_ready() const noexcept { return false; }
                 coroutine_handle<>
                         await_suspend(coroutine_handle<> awaiting) noexcept {
-                    t.coro.promise().continuation = awaiting;
-                    if (not t.started) {
-                        t.started = true;
-                        return t.coro.get();
+                    coro.promise().continuation = awaiting;
+                    if (not coro.promise().started) {
+                        coro.promise().started = true;
+                        return coro.get();
                     } else {
                         return noop_coroutine();
                     }
                 }
-                Y await_resume() { return t.coro.promise().consume_value(); }
+                Y await_resume() { return coro.promise().consume_value(); }
             };
-            return awaitable{*this};
+            return awaitable{std::move(coro)};
         }
 
         /// Or use this from a normal function
@@ -78,57 +131,25 @@ namespace felspar::coro {
 
       private:
         handle_type coro;
-        bool started = false;
 
         void start() {
-            if (not started) {
-                started = true;
+            if (not coro) {
+                throw std::runtime_error{"Cannot start an empty task"};
+            } else if (not coro.promise().started) {
+                coro.promise().started = true;
                 coro.resume();
             }
         }
     };
 
 
-    struct task_promise_base {
-        std::exception_ptr eptr = {};
-        coroutine_handle<> continuation = {};
-        auto initial_suspend() const noexcept { return suspend_always{}; }
-        void unhandled_exception() noexcept { eptr = std::current_exception(); }
-        auto final_suspend() noexcept {
-            return symmetric_continuation{continuation};
-        }
-        void consume_value() {
-            if (eptr) { std::rethrow_exception(eptr); }
-        }
-    };
-    template<>
-    struct task_promise<void> : public task_promise_base {
-        using value_type = void;
-        using handle_type = unique_handle<task_promise<void>>;
-        auto get_return_object() {
-            return task<void>{handle_type::from_promise(*this)};
-        }
-        void return_void() const noexcept {}
-    };
-    template<typename Y>
-    struct task_promise : public task_promise_base {
-        using value_type = Y;
-        using handle_type = unique_handle<task_promise<Y>>;
-        std::optional<value_type> value = {};
-        auto get_return_object() {
-            return task<value_type>{handle_type::from_promise(*this)};
-        }
-        void return_value(value_type y) { value = std::move(y); }
-        value_type consume_value() {
-            task_promise_base::consume_value();
-            if (not value.has_value()) {
-                throw std::runtime_error("The task doesn't have a value");
-            }
-            value_type rv = std::move(*value);
-            value.reset();
-            return rv;
-        }
-    };
+    inline task<void> task_promise<void>::get_return_object() {
+        return task<void>{handle_type::from_promise(*this)};
+    }
+    template<typename T>
+    inline auto task_promise<T>::get_return_object() -> task<value_type> {
+        return task<value_type>{handle_type::from_promise(*this)};
+    }
 
 
 }
