@@ -81,10 +81,6 @@ namespace felspar::coro {
             return *this;
         }
 
-        /// Conversion from related handle types
-        template<typename H>
-        unique_handle(unique_handle<H> &&h) noexcept : handle{h.release()} {}
-
         /// Comparison
         template<typename T>
         bool operator==(unique_handle<T> c) const {
