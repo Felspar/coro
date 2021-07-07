@@ -105,7 +105,7 @@ namespace felspar::coro {
         }
         decltype(auto) promise() noexcept { return handle.promise(); }
         decltype(auto) promise() const noexcept { return handle.promise(); }
-        decltype(auto) resume() noexcept { return handle.resume(); }
+        void resume() noexcept { handle.resume(); }
     };
 
 
