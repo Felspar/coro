@@ -75,15 +75,29 @@ namespace {
                               };
                               check(doubler().get()) == 42;
                           })
-                    .test("awaitable must be r-value", [](auto check) {
-                        auto half_answer = []() -> felspar::coro::task<int> {
-                            co_return 21;
+                    .test("awaitable must be r-value",
+                          [](auto check) {
+                              auto half_answer =
+                                      []() -> felspar::coro::task<int> {
+                                  co_return 21;
+                              };
+                              auto doubler = [](felspar::coro::task<int> n)
+                                      -> felspar::coro::task<int> {
+                                  co_return 2 * co_await std::move(n);
+                              };
+                              check(doubler(half_answer()).get()) == 42;
+                          })
+                    .test("void task", [](auto check) {
+                        bool run = false;
+                        auto const empty =
+                                [](bool &r) -> felspar::coro::task<void> {
+                            r = true;
+                            co_return;
                         };
-                        auto doubler = [](felspar::coro::task<int> n)
-                                -> felspar::coro::task<int> {
-                            co_return 2 * co_await std::move(n);
-                        };
-                        check(doubler(half_answer()).get()) == 42;
+                        auto t = empty(run);
+                        check(run) == false;
+                        std::move(t).get();
+                        check(run) == true;
                     });
 
 
