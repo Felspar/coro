@@ -85,11 +85,6 @@ namespace felspar::coro {
         /// Movable
         task(task &&t) noexcept = default;
         task &operator=(task &&t) noexcept = default;
-        /// TODO An asynchronous task may get to here while still be alive
-        /// blocked on whatever asynchronous API it is waiting on. In this
-        /// case calling destroy will be a big problem for it. The coroutine
-        /// here should see that and decouple and leave it to the
-        /// asynchronous mechanism to destroy the coroutine.
         ~task() = default;
 
         /// Coroutine and awaitable
