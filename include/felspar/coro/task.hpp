@@ -35,10 +35,12 @@ namespace felspar::coro {
     };
     template<>
     struct task_promise<void> final : public task_promise_base {
-        bool has_value = false;
         using value_type = void;
         using handle_type = unique_handle<task_promise<void>>;
+
         task<void> get_return_object();
+
+        bool has_value = false;
         void return_void() noexcept { has_value = true; }
         void consume_value() {
             check_exception();
@@ -51,14 +53,16 @@ namespace felspar::coro {
     struct task_promise final : public task_promise_base {
         using value_type = Y;
         using handle_type = unique_handle<task_promise<Y>>;
-        std::optional<value_type> value = {};
+
         task<value_type> get_return_object();
+
+        std::optional<value_type> value = {};
         void return_value(value_type y) { value = std::move(y); }
         value_type consume_value() {
             check_exception();
             if (not value.has_value()) {
                 throw std::runtime_error{
-                        "The task hasn't completed with a value"};
+                        "The task hasn't completed with a value "};
             }
             value_type rv = std::move(*value);
             value.reset();
