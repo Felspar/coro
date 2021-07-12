@@ -40,11 +40,13 @@ namespace felspar::coro {
 
         task<void> get_return_object();
 
-        bool has_value = false;
-        void return_void() noexcept { has_value = true; }
+        bool has_returned = false;
+        bool has_value() const noexcept { return has_returned; }
+        void return_void() noexcept { has_returned = true; }
+
         void consume_value() {
             check_exception();
-            if (not has_value) {
+            if (not has_returned) {
                 throw std::runtime_error{"The task hasn't completed"};
             }
         }
@@ -57,7 +59,9 @@ namespace felspar::coro {
         task<value_type> get_return_object();
 
         std::optional<value_type> value = {};
+        bool has_value() const noexcept { return static_cast<bool>(value); }
         void return_value(value_type y) { value = std::move(y); }
+
         value_type consume_value() {
             check_exception();
             if (not value.has_value()) {
@@ -96,13 +100,17 @@ namespace felspar::coro {
         auto operator co_await() && {
             struct awaitable {
                 handle_type coro;
-                bool await_ready() const noexcept { return false; }
+                bool await_ready() const noexcept {
+                    return coro.promise().has_value();
+                }
                 coroutine_handle<>
                         await_suspend(coroutine_handle<> awaiting) noexcept {
                     coro.promise().continuation = awaiting;
                     if (not coro.promise().started) {
                         coro.promise().started = true;
                         return coro.get();
+                    } else if (coro.promise().has_value()) {
+                        return awaiting;
                     } else {
                         return noop_coroutine();
                     }
