@@ -41,7 +41,7 @@ namespace felspar::coro {
         task<void> get_return_object();
 
         bool has_returned = false;
-        bool has_value() const noexcept { return has_returned; }
+        bool has_value() const noexcept { return has_returned or eptr; }
         void return_void() noexcept { has_returned = true; }
 
         void consume_value() {
@@ -59,7 +59,7 @@ namespace felspar::coro {
         task<value_type> get_return_object();
 
         std::optional<value_type> value = {};
-        bool has_value() const noexcept { return static_cast<bool>(value); }
+        bool has_value() const noexcept { return value or eptr; }
         void return_value(value_type y) { value = std::move(y); }
 
         value_type consume_value() {

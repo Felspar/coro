@@ -69,8 +69,11 @@ namespace felspar::coro {
             return symmetric_continuation{std::exchange(continuation, {})};
         }
 
-        void unhandled_exception() { eptr = std::current_exception(); }
-
+        void unhandled_exception() {
+            eptr = std::current_exception();
+            completed = true;
+            value.reset();
+        }
         auto return_void() {
             completed = true;
             value.reset();
