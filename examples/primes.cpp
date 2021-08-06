@@ -5,9 +5,10 @@
  * after a [Greek mathematician from the third century
  * BCE](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes).
  *
- * Instead of testing numbers through division, sieve produces primes using only
- * addition. At the base of the chain is a generator that provides all of the
- * numbers we wish to test. This generator gives us our first prime, which is 2.
+ * Instead of testing numbers through division, the sieve produces primes using
+ * only addition. At the base of the chain is a generator that provides all of
+ * the numbers we wish to test. This generator gives us our first prime, which
+ * is 2.
  *
  * We then place a generator in front of that which will check whether numbers
  * are divisible by 2 or not. This will tell us that 3 is our next prime. A new
@@ -55,8 +56,10 @@ namespace {
              * concerned.
              */
             while (checking < value) { checking += prime; }
-            /// We only yield a value further up the sieve if the checking value
-            /// is larger then the value we're checking (case 2 above)
+            /**
+             * We only yield a value further up the sieve if the checking value
+             * is larger than the value we're checking (case 2 above)
+             */
             if (checking > value) { co_yield *value; }
         }
     }
@@ -67,8 +70,10 @@ int main() {
     for (auto primes = numbers(1000000); auto prime = primes.next();) {
         /// Any number that comes out of the `primes` sieve is prime
         std::cout << *prime << ' ';
-        /// We have to add that prime value to the `primes` sieve so that
-        /// multiples of it also get checked
+        /**
+         * We have to add that prime value to the `primes` sieve so that
+         * multiples of it also get checked
+         */
         primes = sieve(*prime, std::move(primes));
         /**
          * We actually only need to keep adding the prime to the  `primes` sieve
