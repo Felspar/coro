@@ -19,6 +19,8 @@ endif()
 target_link_libraries(felspar-coro INTERFACE felspar-memory)
 install(DIRECTORY include/felspar DESTINATION include)
 
+add_subdirectory(examples)
+
 if(TARGET check)
     set_property(TARGET check PROPERTY EXCLUDE_FROM_ALL TRUE)
     add_subdirectory(test)
