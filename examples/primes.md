@@ -1,6 +1,6 @@
 # Prime numbers
 
-The prime number generator examples various implementations of the Sieve of Eratosthenes to find prime numbers up to a numeric limit. For a detailed description of how the sieve works see [primes-1-generator.cpp](./primes-1-generator.cpp).
+The prime number generator examples various implementations of the Sieve of Eratosthenes to find prime numbers up to a numeric limit. For a detailed description of how the sieve works see [primes-1-generator.cpp](./primes-1-generator.cpp), but the short version is that a stack of coroutines per prime only let through numbers not multiples of their prime.
 
 The times are recorded on my desktop (AMD R9 5950X) without really controlling for thermals or boost clocks, so they're a bit noisy, but the differences are large enough that the differences are clear anyway.
 
@@ -15,7 +15,7 @@ Because the sieve only requires addition and comparison, it should make this qui
   - clang 14s
   - gcc core dump at about 820,000
 
-As you push clang to looking at larger numbers it also dumps core. The core dump is due to stack exhaustion. Basically the `generator` has to call in to the one below in order to pull the next value. Eventually the stack of coroutines in the sieve becomes large enough that they cause a stack overflow.
+As you push clang to looking at larger numbers it also dumps core. The core dump is due to stack exhaustion due to all of the interconnected coroutines. Basically the `generator` has to call in to the one below in order to pull the next value. Eventually the stack of coroutines in the sieve becomes large enough that they cause a stack overflow.
 
 
 ## primes-2-stream.cpp

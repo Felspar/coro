@@ -6,9 +6,9 @@
  * BCE](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes).
  *
  * Instead of testing numbers through division, the sieve produces primes using
- * only addition. At the base of the chain is a generator that provides all of
- * the numbers we wish to test. This generator gives us our first prime, which
- * is 2.
+ * only addition. This works by using connected coroutines each of which lets through numbers that are not multiples of the prime it has been given.
+ *
+ * At the base of the chain is a generator that provides all of the numbers we wish to test. This generator gives us our first prime, which is 2.
  *
  * We then place a generator in front of that which will check whether numbers
  * are divisible by 2 or not. This will tell us that 3 is our next prime. A new
