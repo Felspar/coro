@@ -20,7 +20,7 @@ As you push clang to looking at larger numbers it also dumps core. The core dump
 
 ## primes-2-stream.cpp
 
-[This just changes the generator type](./primes-2-stream.cpp) to stream and adds the required `co_await`. Now we also need to lift the old `main` into a coroutine, which can be easily done using `task`.
+[This just changes the generator type](./primes-2-stream.cpp) to `stream` (an asynchronous generator type) and adds the required `co_await`. Now we also need to lift the old `main` into a coroutine, which can be easily done using `task`.
 
 * for up to 1 million
   - clang 36s
@@ -47,6 +47,6 @@ The speed up is impressive, and allows us to check much larger numbers with reas
 
 It seems that clang is more efficient with the stack usage, but gcc is slightly better at optimising the code. At up to 10-25% improvement this is a significant win for gcc though.
 
-It's also clear that the `generator` type is generally much faster than the `stream`, but the inability to do real symmetric transfer means that you must be careful about stack usage if you have very long chains of them. The `stream` type is far more scalable, but it comes with the cost that it can only be used from coroutines due to the required `co_await`.
+It's also clear that the `generator` type is generally much faster than the `stream`, but the inability to do real symmetric transfer (the continuation must be called directly) means that you must be careful about stack usage if you have very long chains of them. The `stream` type is far more scalable, but it comes with the cost that it can only be used from coroutines due to the required `co_await`.
 
 The optimised implementation just goes to show that micro-optimisations are great and all, but looking for more efficient algorithms is a far better use of time.
