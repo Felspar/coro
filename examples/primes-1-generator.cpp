@@ -67,9 +67,11 @@ namespace {
 
 
 int main() {
+    integer found{};
     for (auto primes = numbers(1000000); auto prime = primes.next();) {
         /// Any number that comes out of the `primes` sieve is prime
         std::cout << *prime << ' ';
+        ++found;
         /**
          * We have to add that prime value to the `primes` sieve so that
          * multiples of it also get checked
@@ -82,6 +84,6 @@ int main() {
          * impact on performance.
          */
     }
-    std::cout << std::endl;
+    std::cout << "\nFound " << found << " primes\n";
     return 0;
 }
