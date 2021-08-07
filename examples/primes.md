@@ -18,7 +18,7 @@ Because the sieve only requires addition and comparison, it should make this qui
 As you push clang to looking at larger numbers it also dumps core. The core dump is due to stack exhaustion. Basically the `generator` has to call in to the one below in order to pull the next value. Eventually the stack of coroutines in the sieve becomes large enough that they cause a stack overflow.
 
 
-# primes-2-stream.cpp
+## primes-2-stream.cpp
 
 [This just changes the generator type](./primes-2-stream.cpp) to stream and adds the required `co_await`. Now we also need to lift the old `main` into a coroutine, which can be easily done using `task`.
 
