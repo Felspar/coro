@@ -3,7 +3,7 @@ version: 2.1
 executors:
   clang:
     docker:
-    - image: kayess/ubuntu-updated
+    - image: kayess/cpp
     environment:
       CC: clang-12
       CXX: clang++-12
@@ -11,7 +11,7 @@ executors:
       LD_FLAGS: "-stdlib=libc++"
   gcc:
     docker:
-    - image: kayess/ubuntu-updated
+    - image: kayess/cpp
     environment:
       CC: gcc
       CXX: g++
