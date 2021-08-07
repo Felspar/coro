@@ -3,7 +3,7 @@ version: 2.1
 executors:
   clang:
     docker:
-    - image: fost/circleci
+    - image: kayess/ubuntu-updated
     environment:
       CC: clang
       CXX: clang++
@@ -11,10 +11,10 @@ executors:
       LD_FLAGS: "-stdlib=libc++"
   gcc:
     docker:
-    - image: fost/circleci
+    - image: kayess/ubuntu-updated
     environment:
-      CC: gcc-10
-      CXX: g++-10
+      CC: gcc
+      CXX: g++
 
 jobs:
   build:
