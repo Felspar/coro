@@ -89,8 +89,8 @@ int main() {
         /**
          * We actually only need to keep adding the prime to the  `primes` sieve
          * as long as the square of the prime is less than the top value we're
-         * checking. For very large checks this is likely to have a measurable
-         * impact on performance.
+         * checking. This is a significant optimisation and is implemented in
+         * [primes-3-optimised.cpp](./primes-3-optimised.cpp)
          */
     }
     std::cout << "\nFound " << found << " primes\n";
