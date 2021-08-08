@@ -49,18 +49,23 @@ namespace {
         for (auto checking = prime; auto value = sieve.next();) {
             /**
              * If the number we're checking against is too low then keep adding
-             * the prime we're checking until one of two things happens:
+             * the prime we're checking until.
+             */
+            while (checking < value) { checking += prime; }
+            /**
+             * We're now in one of two things situations:
+             *
              * 1. The number is equal to the value, in which case the value is a
              * multiple of this prime and we must fetch the next value from the
              * sieve below us.
              * 2. The number is larger than the value we're checking which means
              * that the value is potentially prime as far as this check is
              * concerned.
-             */
-            while (checking < value) { checking += prime; }
-            /**
-             * We only yield a value further up the sieve if the checking value
-             * is larger than the value we're checking (case 2 above)
+             *
+             * If we're in the second situation then this is certainly a prime
+             * if this is the last part of the sieve, or potentially a prime if
+             * this is lower down in the sieve, so we yield it to the next layer
+             * up.
              */
             if (checking > value) { co_yield *value; }
         }
@@ -70,8 +75,10 @@ namespace {
 
 int main() {
     integer found{};
-    for (auto primes = numbers(1000000); auto prime = primes.next();) {
-        /// Any number that comes out of the `primes` sieve is prime
+    for (auto primes = numbers(1'000'000); auto prime = primes.next();) {
+        /**
+         * All numbers that come out of the `primes` sieve are prime
+         */
         std::cout << *prime << ' ';
         ++found;
         /**
