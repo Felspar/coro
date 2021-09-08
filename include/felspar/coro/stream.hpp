@@ -8,6 +8,8 @@
 namespace felspar::coro {
 
 
+    template<typename Y, typename H>
+    class stream_awaitable;
     template<typename Y>
     struct stream_promise;
 
@@ -31,27 +33,7 @@ namespace felspar::coro {
         stream &operator=(stream &&t) noexcept = default;
         ~stream() = default;
 
-        auto next() {
-            struct awaitable {
-                handle_type &yielding_coro;
-                bool await_ready() const noexcept {
-                    return yielding_coro.promise().completed;
-                }
-                auto await_suspend(coroutine_handle<> awaiting) noexcept {
-                    yielding_coro.promise().continuation = awaiting;
-                    return yielding_coro.get();
-                }
-                memory::holding_pen<Y> await_resume() {
-                    if (auto eptr = yielding_coro.promise().eptr) {
-                        std::rethrow_exception(eptr);
-                    } else {
-                        return std::move(yielding_coro.promise().value)
-                                .transfer_out();
-                    }
-                }
-            };
-            return awaitable{yielding_coro};
-        }
+        stream_awaitable<Y, handle_type> next();
     };
 
 
@@ -91,6 +73,38 @@ namespace felspar::coro {
     };
 
 
+    /// The awaitable type
+    template<typename Y, typename H>
+    class stream_awaitable {
+      public:
+        stream_awaitable(H &c) : yielding_coro{c} {}
+
+        bool await_ready() const noexcept {
+            return yielding_coro.promise().completed;
+        }
+        auto await_suspend(coroutine_handle<> awaiting) noexcept {
+            yielding_coro.promise().continuation = awaiting;
+            return yielding_coro.get();
+        }
+        memory::holding_pen<Y> await_resume() {
+            if (auto eptr = yielding_coro.promise().eptr) {
+                std::rethrow_exception(eptr);
+            } else {
+                return std::move(yielding_coro.promise().value).transfer_out();
+            }
+        }
+
+      private:
+        H &yielding_coro;
+    };
+    template<typename Y>
+    inline stream_awaitable<Y, typename stream<Y>::handle_type>
+            stream<Y>::next() {
+        return {yielding_coro};
+    }
+
+
+    /// Can be used to pipe streams into other streams
     template<typename Y, typename X>
     inline X operator|(stream<Y> &&s, X (*c)(stream<Y>)) {
         return c(std::move(s));
