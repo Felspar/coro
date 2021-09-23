@@ -24,6 +24,7 @@ namespace felspar::coro {
             signalled = true;
             resume_if_needed();
         }
+        bool cancelled() const noexcept { return signalled; }
 
         /// Wrap an awaitable so that an early resumption can be signalled
         template<typename A>
