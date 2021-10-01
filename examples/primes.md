@@ -28,6 +28,8 @@ As you push clang to looking at larger numbers it also dumps core. The core dump
 
 This implementation is clearly a good deal slower, but has the advantage that it can be pushed to much larger values due to the fact that the stream together with the `co_await` allows for symmetric transfer when values are fetched from further down in the sieve. This means that this version never needs more than a handful of stack frames to work so the sieve size is limited only by available RAM and not by available stack.
 
+Lewis Baker has a good write up about [symmetric transfer here](https://lewissbaker.github.io/2020/05/11/understanding_symmetric_transfer).
+
 
 ## primes-3-optimised.cpp
 
