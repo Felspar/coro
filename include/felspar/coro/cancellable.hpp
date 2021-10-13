@@ -52,6 +52,20 @@ namespace felspar::coro {
             };
             return awaitable{std::move(coro_awaitable), *this};
         }
+
+        /// This can be directly awaited until signalled
+        auto operator co_await() {
+            struct awaitable {
+                cancellable &b;
+
+                bool await_ready() const noexcept { return b.signalled; }
+                auto await_suspend(coroutine_handle<> h) noexcept {
+                    b.continuation = h;
+                }
+                auto await_resume() noexcept {}
+            };
+            return awaitable{*this};
+        }
     };
 
 
