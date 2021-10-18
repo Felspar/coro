@@ -10,12 +10,13 @@
 namespace felspar::coro {
 
 
-    template<typename Y>
+    template<typename Y, typename Allocator = void>
     class task;
-    template<typename Y>
+    template<typename Y, typename Allocator>
     struct task_promise;
 
 
+    template<typename Allocator>
     struct task_promise_base {
         /// Flag to ensure the coroutine is started at appropriate points in time
         bool started = false;
@@ -33,12 +34,17 @@ namespace felspar::coro {
             return symmetric_continuation{continuation};
         }
     };
-    template<>
-    struct task_promise<void> final : public task_promise_base {
+    template<typename Allocator>
+    struct task_promise<void, Allocator> final :
+    public task_promise_base<Allocator> {
         using value_type = void;
-        using handle_type = unique_handle<task_promise<void>>;
+        using allocator_type = Allocator;
+        using handle_type = unique_handle<task_promise>;
 
-        task<void> get_return_object();
+        using task_promise_base<allocator_type>::eptr;
+        using task_promise_base<allocator_type>::check_exception;
+
+        task<void, allocator_type> get_return_object();
 
         bool has_returned = false;
         bool has_value() const noexcept { return has_returned or eptr; }
@@ -51,12 +57,16 @@ namespace felspar::coro {
             }
         }
     };
-    template<typename Y>
-    struct task_promise final : public task_promise_base {
+    template<typename Y, typename Allocator>
+    struct task_promise final : public task_promise_base<Allocator> {
         using value_type = Y;
-        using handle_type = unique_handle<task_promise<Y>>;
+        using allocator_type = Allocator;
+        using handle_type = unique_handle<task_promise>;
 
-        task<value_type> get_return_object();
+        using task_promise_base<allocator_type>::eptr;
+        using task_promise_base<allocator_type>::check_exception;
+
+        task<value_type, allocator_type> get_return_object();
 
         std::optional<value_type> value = {};
         bool has_value() const noexcept { return value or eptr; }
@@ -75,13 +85,14 @@ namespace felspar::coro {
     };
 
 
-    template<typename Y>
+    template<typename Y, typename Allocator>
     class [[nodiscard]] task final {
-        friend struct task_promise<Y>;
+        friend struct task_promise<Y, Allocator>;
 
       public:
         using value_type = Y;
-        using promise_type = task_promise<value_type>;
+        using allocator_type = Allocator;
+        using promise_type = task_promise<value_type, allocator_type>;
         using handle_type = typename promise_type::handle_type;
 
         /// Construct a new task from a previously released one
@@ -150,12 +161,16 @@ namespace felspar::coro {
     };
 
 
-    inline task<void> task_promise<void>::get_return_object() {
-        return task<void>{handle_type::from_promise(*this)};
+    template<typename Allocator>
+    inline auto task_promise<void, Allocator>::get_return_object()
+            -> task<void, allocator_type> {
+        return task<void, allocator_type>{handle_type::from_promise(*this)};
     }
-    template<typename T>
-    inline auto task_promise<T>::get_return_object() -> task<value_type> {
-        return task<value_type>{handle_type::from_promise(*this)};
+    template<typename T, typename Allocator>
+    inline auto task_promise<T, Allocator>::get_return_object()
+            -> task<value_type, allocator_type> {
+        return task<value_type, allocator_type>{
+                handle_type::from_promise(*this)};
     }
 
 
