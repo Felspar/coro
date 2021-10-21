@@ -12,11 +12,13 @@ using integer = std::uint64_t;
 namespace {
     using allocator = felspar::memory::stack_storage<>;
 
-    felspar::coro::stream<integer, allocator> numbers(integer upto) {
+    felspar::coro::stream<integer, allocator>
+            numbers(allocator &, integer upto) {
         for (integer number{2}; number <= upto; ++number) { co_yield number; }
     }
     felspar::coro::stream<integer, allocator>
-            sieve(integer prime,
+            sieve(allocator &,
+                  integer prime,
                   felspar::coro::stream<integer, allocator> sieve) {
         for (auto checking = prime; auto value = co_await sieve.next();) {
             while (checking < *value) { checking += prime; }
@@ -25,12 +27,13 @@ namespace {
     }
 
     felspar::coro::task<int> co_main() {
+        allocator alloc;
         integer found{};
-        for (auto primes = numbers(1'000);
+        for (auto primes = numbers(alloc, 1'000);
              auto prime = co_await primes.next();) {
             std::cout << *prime << ' ';
             ++found;
-            primes = sieve(*prime, std::move(primes));
+            primes = sieve(alloc, *prime, std::move(primes));
         }
         std::cout << "\nFound " << found << " primes\n";
         co_return 0;
