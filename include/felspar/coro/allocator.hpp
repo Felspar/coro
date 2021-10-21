@@ -26,8 +26,8 @@ namespace felspar::coro {
 
     template<typename Allocator>
     struct promise_allocator_impl : public promise_allocator_impl<void> {
-        using operator new;
-        using operator delete;
+        using promise_allocator_impl<void>::operator new;
+        using promise_allocator_impl<void>::operator delete;
     };
 
 
