@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <felspar/coro/allocator.hpp>
 #include <felspar/coro/coroutine.hpp>
 #include <felspar/memory/holding_pen.hpp>
 
@@ -8,20 +9,20 @@
 namespace felspar::coro {
 
 
-    template<typename Y>
+    template<typename Y, typename Allocator = void>
     struct stream_promise;
 
 
-    template<typename Y>
+    template<typename Y, typename Allocator = void>
     class stream final {
-        friend struct stream_promise<Y>;
-        using handle_type = typename stream_promise<Y>::handle_type;
+        friend struct stream_promise<Y, Allocator>;
+        using handle_type = typename stream_promise<Y, Allocator>::handle_type;
         handle_type yielding_coro;
 
         stream(handle_type h) : yielding_coro{std::move(h)} {}
 
       public:
-        using promise_type = stream_promise<Y>;
+        using promise_type = stream_promise<Y, Allocator>;
 
         /// Not copyable
         stream(stream const &) = delete;
@@ -55,8 +56,11 @@ namespace felspar::coro {
     };
 
 
-    template<typename Y>
-    struct stream_promise {
+    template<typename Y, typename Allocator>
+    struct stream_promise : private promise_allocator_impl<Allocator> {
+        using promise_allocator_impl<Allocator>::operator new;
+        using promise_allocator_impl<Allocator>::operator delete;
+
         coroutine_handle<> continuation = {};
         bool completed = false;
         memory::holding_pen<Y> value = {};
@@ -81,7 +85,7 @@ namespace felspar::coro {
         }
 
         auto get_return_object() {
-            return stream<Y>{handle_type::from_promise(*this)};
+            return stream<Y, Allocator>{handle_type::from_promise(*this)};
         }
 
         auto initial_suspend() const noexcept { return suspend_always{}; }
@@ -91,8 +95,8 @@ namespace felspar::coro {
     };
 
 
-    template<typename Y, typename X>
-    inline X operator|(stream<Y> &&s, X (*c)(stream<Y>)) {
+    template<typename Y, typename YA, typename X, typename XA>
+    inline X operator|(stream<Y, YA> &&s, X (*c)(stream<Y, XA>)) {
         return c(std::move(s));
     }
 

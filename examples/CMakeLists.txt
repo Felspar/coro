@@ -6,3 +6,6 @@ target_link_libraries(primes-2-stream felspar-coro)
 
 add_executable(primes-3-optimised primes-3-optimised.cpp)
 target_link_libraries(primes-3-optimised felspar-coro)
+
+add_executable(primes-4-allocator primes-4-allocator.cpp)
+target_link_libraries(primes-4-allocator felspar-coro)
