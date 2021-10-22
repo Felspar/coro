@@ -10,7 +10,7 @@ using integer = std::uint64_t;
 
 
 namespace {
-    using allocator = felspar::memory::stack_storage<>;
+    using allocator = felspar::memory::stack_storage<40 << 20, 100'000>;
 
     felspar::coro::stream<integer, allocator>
             numbers(allocator &, integer upto) {
@@ -27,9 +27,10 @@ namespace {
     }
 
     felspar::coro::task<int> co_main() {
-        allocator alloc;
+        auto palloc = std::make_unique<allocator>();
+        auto &alloc = *palloc;
         integer found{};
-        for (auto primes = numbers(alloc, 1'000);
+        for (auto primes = numbers(alloc, 1'000'000);
              auto prime = co_await primes.next();) {
             std::cout << *prime << ' ';
             ++found;
