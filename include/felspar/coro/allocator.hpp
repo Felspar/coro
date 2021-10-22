@@ -18,9 +18,9 @@ namespace felspar::coro {
     struct promise_allocator_impl<void> {
         struct allocation {
             /// Delete the promise
-            void (*promise_deleter)(felspar::memory::any_buffer &, void *);
+            void (*promise_deleter)(void *, void *);
             /// Store allocation details
-            felspar::memory::any_buffer allocator;
+            void *allocator = nullptr;
         };
 
         /// Calculate the lowest offset for an aligned memory block above the
@@ -33,21 +33,18 @@ namespace felspar::coro {
         void *operator new(std::size_t const psize) {
             auto const alloc_base = aligned_offset(psize);
             auto const size = alloc_base + sizeof(allocation);
-            std::unique_ptr<std::byte> base{::new std::byte[size]};
-            new (base.get() + alloc_base)
-                    allocation{[](felspar::memory::any_buffer &, void *ptr) {
-                        ::delete[](reinterpret_cast<std::byte *>(ptr));
-                    }};
-            return base.release();
+            std::byte *base{
+                    reinterpret_cast<std::byte *>(::operator new(size))};
+            new (base + alloc_base) allocation{
+                    [](void *, void *ptr) { ::operator delete(ptr); }};
+            return base;
         }
         void operator delete(void *const ptr, std::size_t const psize) {
             auto const alloc_base = aligned_offset(psize);
             std::byte *const base = reinterpret_cast<std::byte *>(ptr);
             allocation *palloc = std::launder(
                     reinterpret_cast<allocation *>(base + alloc_base));
-            auto alloc = std::move(*palloc);
-            std::destroy_at(palloc);
-            alloc.promise_deleter(alloc.allocator, ptr);
+            palloc->promise_deleter(palloc->allocator, ptr);
         }
     };
 
@@ -64,10 +61,9 @@ namespace felspar::coro {
             auto const size = alloc_base + sizeof(allocation);
             std::unique_ptr<std::byte> base{alloc.allocate(size)};
             new (base.get() + alloc_base) allocation{
-                    [](felspar::memory::any_buffer &b, void *ptr) {
-                        auto palloc = b.fetch<Allocator *>();
-                        (*palloc)->deallocate(
-                                reinterpret_cast<std::byte *>(ptr));
+                    [](void *b, void *ptr) {
+                        auto *palloc = reinterpret_cast<Allocator *>(b);
+                        palloc->deallocate(reinterpret_cast<std::byte *>(ptr));
                     },
                     &alloc};
             return base.release();
