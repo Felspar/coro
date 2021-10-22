@@ -16,11 +16,18 @@ namespace felspar::coro {
 
     template<>
     struct promise_allocator_impl<void> {
+        void *operator new(std::size_t sz) { return ::operator new(sz); }
+        void operator delete(void *const ptr, std::size_t) {
+            return ::operator delete(ptr);
+        }
+    };
+
+
+    template<typename Allocator>
+    struct promise_allocator_impl {
         struct allocation {
-            /// Delete the promise
-            void (*promise_deleter)(void *, void *);
             /// Store allocation details
-            void *allocator = nullptr;
+            Allocator *allocator = nullptr;
         };
 
         /// Calculate the lowest offset for an aligned memory block above the
@@ -35,38 +42,30 @@ namespace felspar::coro {
             auto const size = alloc_base + sizeof(allocation);
             std::byte *base{
                     reinterpret_cast<std::byte *>(::operator new(size))};
-            new (base + alloc_base) allocation{
-                    [](void *, void *ptr) { ::operator delete(ptr); }};
+            new (base + alloc_base) allocation{};
             return base;
         }
-        void operator delete(void *const ptr, std::size_t const psize) {
-            auto const alloc_base = aligned_offset(psize);
-            std::byte *const base = reinterpret_cast<std::byte *>(ptr);
-            allocation *palloc = std::launder(
-                    reinterpret_cast<allocation *>(base + alloc_base));
-            palloc->promise_deleter(palloc->allocator, ptr);
-        }
-    };
-
-
-    template<typename Allocator>
-    struct promise_allocator_impl : public promise_allocator_impl<void> {
-        using promise_allocator_impl<void>::operator new;
-        using promise_allocator_impl<void>::operator delete;
 
         template<typename... Args>
         void *operator new(
                 std::size_t const psize, Allocator &alloc, Args &&...) {
             auto const alloc_base = aligned_offset(psize);
             auto const size = alloc_base + sizeof(allocation);
-            std::unique_ptr<std::byte> base{alloc.allocate(size)};
-            new (base.get() + alloc_base) allocation{
-                    [](void *b, void *ptr) {
-                        auto *palloc = reinterpret_cast<Allocator *>(b);
-                        palloc->deallocate(reinterpret_cast<std::byte *>(ptr));
-                    },
-                    &alloc};
-            return base.release();
+            std::byte *base{alloc.allocate(size)};
+            new (base + alloc_base) allocation{&alloc};
+            return base;
+        }
+        void operator delete(void *const ptr, std::size_t const psize) {
+            auto const alloc_base = aligned_offset(psize);
+            std::byte *const base = reinterpret_cast<std::byte *>(ptr);
+            allocation *palloc =
+                    reinterpret_cast<allocation *>(base + alloc_base);
+            if (palloc->allocator) {
+                auto *alloc = palloc->allocator;
+                alloc->deallocate(reinterpret_cast<std::byte *>(ptr));
+            } else {
+                ::operator delete(ptr);
+            }
         }
     };
 
