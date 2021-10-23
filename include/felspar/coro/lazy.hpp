@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <felspar/coro/allocator.hpp>
 #include <felspar/coro/coroutine.hpp>
 
 #include <exception>
@@ -10,8 +11,10 @@
 namespace felspar::coro {
 
 
-    template<typename L>
-    class lazy {
+    /// A lambda/function like type that has an "exactly once" execution
+    /// guarantee, but whose value can be fetched multiple times.
+    template<typename L, typename Allocator = void>
+    class lazy final {
       public:
         lazy(lazy const &) = delete;
         lazy &operator=(lazy const &) = delete;
@@ -19,7 +22,10 @@ namespace felspar::coro {
         lazy &operator=(lazy &&o) = default;
         ~lazy() = default;
 
-        struct promise_type {
+        struct promise_type : private promise_allocator_impl<Allocator> {
+            using promise_allocator_impl<Allocator>::operator new;
+            using promise_allocator_impl<Allocator>::operator delete;
+
             std::exception_ptr eptr;
             std::optional<L> value;
             using handle_type = unique_handle<promise_type>;
@@ -29,7 +35,7 @@ namespace felspar::coro {
             }
 
             template<typename A>
-            suspend_always await_transform(A &&) = delete; // Use async
+            suspend_always await_transform(A &&) = delete;
 
             void unhandled_exception() { eptr = std::current_exception(); }
             void return_value(L v) { value = std::move(v); }
