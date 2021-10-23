@@ -1,6 +1,6 @@
 #include <felspar/coro/stream.hpp>
 #include <felspar/coro/task.hpp>
-#include <felspar/memory/stack.storage.hpp>
+#include <felspar/memory/slab.storage.hpp>
 
 #include <cstdint>
 #include <iostream>
@@ -10,7 +10,7 @@ using integer = std::uint64_t;
 
 
 namespace {
-    using allocator = felspar::memory::stack_storage<40 << 20, 100'000>;
+    using allocator = felspar::memory::slab_storage<40 << 20>;
 
     felspar::coro::stream<integer, allocator>
             numbers(allocator &, integer upto) {
