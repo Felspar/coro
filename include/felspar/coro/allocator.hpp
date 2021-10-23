@@ -2,7 +2,6 @@
 
 
 #include <felspar/memory/any_buffer.hpp>
-#include <cstddef>
 #include <stdexcept>
 
 
@@ -47,14 +46,21 @@ namespace felspar::coro {
         }
 
         template<typename... Args>
-        void *operator new(
-                std::size_t const psize, Allocator &alloc, Args &&...) {
+        void *operator new(std::size_t const psize, Allocator &alloc, Args &...) {
             auto const alloc_base = aligned_offset(psize);
             auto const size = alloc_base + sizeof(allocation);
             std::byte *base{alloc.allocate(size)};
             new (base + alloc_base) allocation{&alloc};
             return base;
         }
+        /// Deal with members that are coroutines. `This` should almost
+        /// certainly be much more restrictive than it is here
+        template<typename This, typename... Args>
+        void *operator new(
+                std::size_t const sz, This &&, Allocator &alloc, Args &...) {
+            return operator new(sz, alloc);
+        }
+
         void operator delete(void *const ptr, std::size_t const psize) {
             auto const alloc_base = aligned_offset(psize);
             std::byte *const base = reinterpret_cast<std::byte *>(ptr);
