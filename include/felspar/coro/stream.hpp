@@ -9,7 +9,7 @@
 namespace felspar::coro {
 
 
-    template<typename Y, typename Allocator = void>
+    template<typename Y, typename Allocator>
     struct stream_promise;
 
 
