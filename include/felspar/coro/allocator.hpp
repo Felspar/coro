@@ -68,7 +68,7 @@ namespace felspar::coro {
                     reinterpret_cast<allocation *>(base + alloc_base);
             if (palloc->allocator) {
                 auto *alloc = palloc->allocator;
-                alloc->deallocate(reinterpret_cast<std::byte *>(ptr));
+                alloc->deallocate(ptr);
             } else {
                 ::operator delete(ptr);
             }
