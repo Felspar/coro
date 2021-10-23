@@ -8,6 +8,8 @@
 
 #pragma once
 
+
+#include <felspar/coro/allocator.hpp>
 #include <felspar/coro/coroutine.hpp>
 #include <optional>
 
@@ -15,22 +17,23 @@
 namespace felspar::coro {
 
 
-    template<typename Y>
+    template<typename Y, typename Allocator>
     struct generator_promise;
 
 
     /// A coroutine based generator. Values may be iterated (`begin`/`end`), or
     /// values may be fetched (`next`), but not both.
-    template<typename Y>
+    template<typename Y, typename Allocator = void>
     class generator final {
-        friend struct generator_promise<Y>;
-        using handle_type = typename generator_promise<Y>::handle_type;
+        friend struct generator_promise<Y, Allocator>;
+        using handle_type =
+                typename generator_promise<Y, Allocator>::handle_type;
         handle_type coro;
 
         generator(handle_type h) : coro{std::move(h)} {}
 
       public:
-        using promise_type = generator_promise<Y>;
+        using promise_type = generator_promise<Y, Allocator>;
 
         /// Not copyable
         generator(generator const &) = delete;
@@ -99,8 +102,11 @@ namespace felspar::coro {
     };
 
 
-    template<typename Y>
-    struct generator_promise {
+    template<typename Y, typename Allocator>
+    struct generator_promise : private promise_allocator_impl<Allocator> {
+        using promise_allocator_impl<Allocator>::operator new;
+        using promise_allocator_impl<Allocator>::operator delete;
+
         std::optional<Y> value = {};
         std::exception_ptr eptr = {};
 
@@ -121,7 +127,7 @@ namespace felspar::coro {
         }
 
         auto get_return_object() {
-            return generator<Y>{handle_type::from_promise(*this)};
+            return generator<Y, Allocator>{handle_type::from_promise(*this)};
         }
         auto initial_suspend() const noexcept { return suspend_always{}; }
         auto final_suspend() const noexcept { return suspend_always{}; }
