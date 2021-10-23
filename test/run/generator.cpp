@@ -7,6 +7,7 @@
 
 
 #include <felspar/coro/generator.hpp>
+#include <felspar/memory/stack.storage.hpp>
 #include <felspar/test.hpp>
 
 #include <vector>
@@ -132,6 +133,26 @@ namespace {
                         check(t.next()) == 55u;
                         check(t.next()).is_falsey();
                     });
+
+
+#ifndef NDEBUG
+    felspar::coro::generator<std::size_t, felspar::memory::stack_storage<>>
+            alloc_fib(felspar::memory::stack_storage<> &) {
+        std::size_t a{1}, b{1};
+        co_yield 1u;
+        while (true) { co_yield a = std::exchange(b, a + b); }
+    }
+
+
+    auto const al = felspar::testsuite("generator/allocator")
+                            .test("alloc", [](auto check) {
+                                felspar::memory::stack_storage alloc;
+                                auto const start_free = alloc.free();
+
+                                auto fib = alloc_fib(alloc);
+                                check(alloc.free()) < start_free;
+                            });
+#endif
 
 
 }
