@@ -11,7 +11,7 @@ namespace felspar::coro {
 
     template<typename Y, typename H>
     class stream_awaitable;
-    template<typename Y, typename Allocator = void>
+    template<typename Y, typename Allocator>
     struct stream_promise;
 
 
