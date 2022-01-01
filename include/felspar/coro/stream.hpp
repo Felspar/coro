@@ -23,7 +23,8 @@ namespace felspar::coro {
         stream(handle_type h) : yielding_coro{std::move(h)} {}
 
       public:
-        using promise_type = stream_promise<Y>;
+        using value_type = Y;
+        using promise_type = stream_promise<value_type>;
 
         /// Not copyable
         stream(stream const &) = delete;
