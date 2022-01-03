@@ -24,6 +24,7 @@ namespace felspar::coro {
 
       public:
         using value_type = Y;
+        using optional_type = memory::holding_pen<value_type>;
         using promise_type = stream_promise<value_type>;
 
         /// Not copyable
