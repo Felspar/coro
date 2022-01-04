@@ -24,7 +24,9 @@ namespace felspar::coro {
         stream(handle_type h) : yielding_coro{std::move(h)} {}
 
       public:
-        using promise_type = stream_promise<Y, Allocator>;
+        using value_type = Y;
+        using optional_type = memory::holding_pen<value_type>;
+        using promise_type = stream_promise<value_type, Allocator>;
 
         /// Not copyable
         stream(stream const &) = delete;
