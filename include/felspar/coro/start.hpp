@@ -9,10 +9,11 @@
 namespace felspar::coro {
 
 
+    template<typename Task>
     class starter {
       public:
-        using promise_type = felspar::coro::task_promise<void>;
-        using handle_type = promise_type::handle_type;
+        using promise_type = typename Task::promise_type;
+        using handle_type = typename promise_type::handle_type;
 
         template<typename... PArgs, typename... MArgs>
         void post(coro::task<void> (*f)(PArgs...), MArgs &&...margs) {
