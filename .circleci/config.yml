@@ -5,8 +5,8 @@ executors:
     docker:
     - image: kayess/cpp
     environment:
-      CC: clang-12
-      CXX: clang++-12
+      CC: clang
+      CXX: clang++
       CXXFLAGS: "-stdlib=libc++"
       LD_FLAGS: "-stdlib=libc++"
   gcc:
