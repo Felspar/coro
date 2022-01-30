@@ -54,3 +54,8 @@ felspar::coro::stream<int> doubler(felspar::coro::stream<int> in) {
 ## `felspar::coro::lazy`
 
 A basic lazily evaluated coroutine. Superficially very similar to a nullary lambda, but with an "only once" execution guarantee. The coroutine can be evaluated from either a normal function or a coroutine, and it's value is returned as if it was a nullary lambda using `operator()()`.
+
+
+## `felspar::coro::start`
+
+Starts and takes over ownership of new coroutines.
