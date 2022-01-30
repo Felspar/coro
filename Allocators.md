@@ -13,8 +13,6 @@ The standard library supports two mechanisms to signal that an allocator should 
 
 Because the allocator must be used by the promise type the `operator new` for the promise type is given access to the arguments of the coroutine so that it can see the allocator. However, C++ doesn't provide any simple mechanism to find the last argument of variadic pack, so only really the second mechanism makes any sense -- it is unfortunate that it is also so ugly :-(
 
-Promise types in this library support this second mechanism for all coroutine kinds through the use of `felspar::coro::promise_allocator_impl`.
-
 
 ## Using a pre-specified allocator type
 
@@ -34,3 +32,5 @@ using allocated_stream = felspar::coro::stream<T, my_allocator>;
 ```
 
 If the first argument passed to the coroutine is an l-reference to the specified allocator type (or is a sub-class of it) then the allocator will be automatically used when allocating the coroutine stack frame. If the first argument doesn't match then the normal (global `operator new`) allocation is done.
+
+Promise types in this library support this mechanism for all coroutine kinds through the use of `felspar::coro::promise_allocator_impl`. Specialisations (partial or full) of this type may be added for the concrete allocator types that are to be used, with the default implementation depending on a allocator type which implements `allocate` and `deallocate`.
