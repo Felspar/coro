@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <felspar/coro/allocator.hpp>
 #include <felspar/coro/coroutine.hpp>
 #include <felspar/memory/holding_pen.hpp>
 
@@ -10,14 +11,14 @@ namespace felspar::coro {
 
     template<typename Y, typename H>
     class stream_awaitable;
-    template<typename Y>
+    template<typename Y, typename Allocator>
     struct stream_promise;
 
 
-    template<typename Y>
+    template<typename Y, typename Allocator = void>
     class stream final {
-        friend struct stream_promise<Y>;
-        using handle_type = typename stream_promise<Y>::handle_type;
+        friend struct stream_promise<Y, Allocator>;
+        using handle_type = typename stream_promise<Y, Allocator>::handle_type;
         handle_type yielding_coro;
 
         stream(handle_type h) : yielding_coro{std::move(h)} {}
@@ -25,7 +26,7 @@ namespace felspar::coro {
       public:
         using value_type = Y;
         using optional_type = memory::holding_pen<value_type>;
-        using promise_type = stream_promise<value_type>;
+        using promise_type = stream_promise<value_type, Allocator>;
 
         /// Not copyable
         stream(stream const &) = delete;
@@ -39,8 +40,11 @@ namespace felspar::coro {
     };
 
 
-    template<typename Y>
-    struct stream_promise {
+    template<typename Y, typename Allocator>
+    struct stream_promise : private promise_allocator_impl<Allocator> {
+        using promise_allocator_impl<Allocator>::operator new;
+        using promise_allocator_impl<Allocator>::operator delete;
+
         coroutine_handle<> continuation = {};
         bool completed = false;
         memory::holding_pen<Y> value = {};
@@ -65,7 +69,7 @@ namespace felspar::coro {
         }
 
         auto get_return_object() {
-            return stream<Y>{handle_type::from_promise(*this)};
+            return stream<Y, Allocator>{handle_type::from_promise(*this)};
         }
 
         auto initial_suspend() const noexcept { return suspend_always{}; }
@@ -99,16 +103,16 @@ namespace felspar::coro {
       private:
         H &yielding_coro;
     };
-    template<typename Y>
-    inline stream_awaitable<Y, typename stream<Y>::handle_type>
-            stream<Y>::next() {
+    template<typename Y, typename A>
+    inline stream_awaitable<Y, typename stream<Y, A>::handle_type>
+            stream<Y, A>::next() {
         return {yielding_coro};
     }
 
 
     /// Can be used to pipe streams into other streams
-    template<typename Y, typename X>
-    inline X operator|(stream<Y> &&s, X (*c)(stream<Y>)) {
+    template<typename Y, typename YA, typename X, typename XA>
+    inline X operator|(stream<Y, YA> &&s, X (*c)(stream<Y, XA>)) {
         return c(std::move(s));
     }
 
