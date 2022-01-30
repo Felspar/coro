@@ -1,8 +1,7 @@
 #pragma once
 
 
-#include <felspar/memory/any_buffer.hpp>
-#include <stdexcept>
+#include <cstddef>
 
 
 namespace felspar::coro {
@@ -29,6 +28,7 @@ namespace felspar::coro {
             Allocator *allocator = nullptr;
         };
 
+        /// TODO This should be felspar-memory
         /// Calculate the lowest offset for an aligned memory block above the
         /// base offset
         static std::size_t aligned_offset(std::size_t const base) {
