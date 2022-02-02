@@ -32,6 +32,34 @@ check(t.next()).is_falsey();
 
 A coroutine whose result must be awaited. Like the `lazy`, the coroutine is not started until the return value is `co_awaited`.
 
+When used from a coroutine, either `co_await` it directly or turn the task into an r-value with move:
+
+```cpp
+auto val = co_await some_task();
+```
+
+```cpp
+auto task = some_task();
+// other things
+auto val = co_await std::move(task);
+```
+
+Note that the task code will not start executing until `co_await`ed.
+
+The task can also be started from a non-coroutine using `.get()`. This also requires a r-value, so:
+
+```cpp
+auto val some_task().get();
+```
+
+```cpp
+auto task = some_task();
+// other things
+auto val = std::move(task).get();
+```
+
+Note that `get` will block until the coroutine completes, so it is generally used at the top level where non-coroutine code starts coroutine execution. Never use `.get()` from within a coroutine or it will likely block forever.
+
 
 ## `felspar::coro::stream`
 
