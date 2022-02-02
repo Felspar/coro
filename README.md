@@ -3,9 +3,12 @@
 **C++ coroutine library and toolkit**
 
 
+**felspar-coro** is a C++20 library to help you to use coroutines in your own libraries and applications. You should be able to use it with a recent clang or gcc compiler on Unix systems (e.g. Linux and Mac).
+
+
 ## Using the library
 
-The library is designed to make it easy to use from CMake projects. To use it add it in your source tree somewhere and then use `add_subdirectory` to include it in your project. The library also requires the use of some other libraries which can be included using `include`. So if you have the library in a folder called `felspar-coro`, you can add the following to your `CMakeLists.txt`:
+The library is designed to be easy to use from CMake projects. To use it add it in your source tree somewhere and then use `add_subdirectory` to include it in your project. The library also requires the use of some other libraries which can get by using an `include`. So if you have the library in a folder called `felspar-coro`, you can add the following to your `CMakeLists.txt`:
 
 ```cmake
 add_subdirectory(felspar-coro)
