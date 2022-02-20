@@ -34,7 +34,7 @@ jobs:
           command: ninja -j1 -C .circleci
       - run:
           name: check tests
-          command: ninja -j1 -C .circleci check
+          command: ninja -j1 -C .circleci felspar-check
 
 workflows:
   all-tests:

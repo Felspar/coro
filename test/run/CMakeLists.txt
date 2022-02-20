@@ -1,5 +1,5 @@
-if(TARGET check)
-    add_test_run(check felspar-coro TESTS
+if(TARGET felspar-check)
+    add_test_run(felspar-check felspar-coro TESTS
             generator.cpp
             lazy.cpp
             task.cpp
