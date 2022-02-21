@@ -68,7 +68,7 @@ namespace felspar::coro {
                     reinterpret_cast<allocation *>(base + alloc_base);
             if (palloc->allocator) {
                 auto *alloc = palloc->allocator;
-                alloc->deallocate(ptr);
+                alloc->deallocate(ptr, psize);
             } else {
                 ::operator delete(ptr);
             }
