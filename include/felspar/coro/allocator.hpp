@@ -49,7 +49,8 @@ namespace felspar::coro {
         void *operator new(std::size_t const psize, Allocator &alloc, Args &...) {
             auto const alloc_base = aligned_offset(psize);
             auto const size = alloc_base + sizeof(allocation);
-            std::byte *base{alloc.allocate(size)};
+            std::byte *base{
+                    reinterpret_cast<std::byte *>(alloc.allocate(size))};
             new (base + alloc_base) allocation{&alloc};
             return base;
         }
