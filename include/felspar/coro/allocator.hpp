@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <cstddef>
+#include <new>
 
 
 namespace felspar::coro {
@@ -65,8 +65,8 @@ namespace felspar::coro {
         void operator delete(void *const ptr, std::size_t const psize) {
             auto const alloc_base = aligned_offset(psize);
             std::byte *const base = reinterpret_cast<std::byte *>(ptr);
-            allocation *palloc =
-                    reinterpret_cast<allocation *>(base + alloc_base);
+            allocation *palloc = std::launder(
+                    reinterpret_cast<allocation *>(base + alloc_base));
             if (palloc->allocator) {
                 auto const size = alloc_base + sizeof(allocation);
                 auto *alloc = palloc->allocator;
