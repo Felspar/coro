@@ -15,7 +15,7 @@ namespace felspar::coro {
         bool signalled = false;
 
         void resume_if_needed() {
-            if (continuation) { std::exchange(continuation, {}).resume(); }
+            if (auto c = std::exchange(continuation, {}); c) { c.resume(); }
         }
 
       public:
