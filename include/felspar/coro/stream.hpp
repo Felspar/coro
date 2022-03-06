@@ -82,26 +82,28 @@ namespace felspar::coro {
     /// The awaitable type
     template<typename Y, typename H>
     class stream_awaitable {
+        friend class cancellable;
+
       public:
-        stream_awaitable(H &c) : yielding_coro{c} {}
+        stream_awaitable(H &c) : continuation{c} {}
 
         bool await_ready() const noexcept {
-            return yielding_coro.promise().completed;
+            return continuation.promise().completed;
         }
         auto await_suspend(coroutine_handle<> awaiting) noexcept {
-            yielding_coro.promise().continuation = awaiting;
-            return yielding_coro.get();
+            continuation.promise().continuation = awaiting;
+            return continuation.get();
         }
         memory::holding_pen<Y> await_resume() {
-            if (auto eptr = yielding_coro.promise().eptr) {
+            if (auto eptr = continuation.promise().eptr) {
                 std::rethrow_exception(eptr);
             } else {
-                return std::move(yielding_coro.promise().value).transfer_out();
+                return std::move(continuation.promise().value).transfer_out();
             }
         }
 
       private:
-        H &yielding_coro;
+        H &continuation;
     };
     template<typename Y, typename A>
     inline stream_awaitable<Y, typename stream<Y, A>::handle_type>

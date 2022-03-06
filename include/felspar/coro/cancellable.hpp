@@ -3,6 +3,8 @@
 
 #include <felspar/coro/coroutine.hpp>
 
+#include <vector>
+
 
 namespace felspar::coro {
 
@@ -11,18 +13,26 @@ namespace felspar::coro {
      * Wait at the suspension point until resumed from an external location.
      */
     class cancellable {
-        coroutine_handle<> continuation = {};
+        std::vector<coroutine_handle<>> continuations = {};
         bool signalled = false;
 
-        void resume_if_needed() {
-            if (auto c = std::exchange(continuation, {}); c) { c.resume(); }
-        }
+        void remove(coroutine_handle<> h) { std::erase(continuations, h); }
 
       public:
+        cancellable() {}
+        cancellable(cancellable const &) = delete;
+        cancellable(cancellable &&) = delete;
+        cancellable &operator=(cancellable const &) = delete;
+        cancellable &operator=(cancellable &&) = delete;
+
         /// Used externally to cancel the controlled coroutine
         void cancel() {
             signalled = true;
-            resume_if_needed();
+            while (continuations.size()) {
+                auto h = continuations.back();
+                continuations.pop_back();
+                h.resume();
+            }
         }
         bool cancelled() const noexcept { return signalled; }
 
@@ -32,18 +42,24 @@ namespace felspar::coro {
             struct awaitable {
                 A a;
                 cancellable &b;
+                coroutine_handle<> continuation = {};
+
+                ~awaitable() { b.remove(continuation); }
 
                 bool await_ready() const noexcept {
                     return b.signalled or a.await_ready();
                 }
                 auto await_suspend(coroutine_handle<> h) noexcept {
                     /// `h` is the coroutine making use of the `cancellable`
-                    b.continuation = h;
+                    continuation = h;
+                    b.continuations.push_back(h);
                     return a.await_suspend(h);
                 }
                 auto await_resume()
                         -> decltype(std::declval<A>().await_resume()) {
+                    b.remove(continuation);
                     if (b.signalled) {
+                        a.continuation = {};
                         return {};
                     } else {
                         return a.await_resume();
@@ -57,12 +73,16 @@ namespace felspar::coro {
         auto operator co_await() {
             struct awaitable {
                 cancellable &b;
+                coroutine_handle<> continuation = {};
+
+                ~awaitable() { b.remove(continuation); }
 
                 bool await_ready() const noexcept { return b.signalled; }
-                auto await_suspend(coroutine_handle<> h) noexcept {
-                    b.continuation = h;
+                void await_suspend(coroutine_handle<> h) noexcept {
+                    continuation = h;
+                    b.continuations.push_back(h);
                 }
-                auto await_resume() noexcept {}
+                void await_resume() noexcept { b.remove(continuation); }
             };
             return awaitable{*this};
         }
