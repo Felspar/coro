@@ -24,11 +24,21 @@ namespace felspar::coro {
             live.push_back(std::move(coro));
         }
 
-        /// Garbage collect old coroutines
-        void gc() {
-            /// TODO This implementation is not exception safe. If
-            /// `consume_value` throws then the entire container is in a weird
-            /// state
+        /// The number of coroutines currently held by the starter
+        std::size_t size() const noexcept { return live.size(); }
+
+        /// Garbage collect old coroutines ignoring any errors and return values
+        void garbage_collect_completed() {
+            live.erase(
+                    std::remove_if(
+                            live.begin(), live.end(),
+                            [](auto const &h) { return h.done(); }),
+                    live.end());
+        }
+        [[deprecated(
+                "Use the new garbage_collect_completed or wait_for_all "
+                "APIs")]] void
+                gc() {
             live.erase(
                     std::remove_if(
                             live.begin(), live.end(),
@@ -41,6 +51,20 @@ namespace felspar::coro {
                                 }
                             }),
                     live.end());
+        }
+
+        /// Wait for all coroutines to complete, or for the first to throw an
+        /// exception. If no exception has happened then returns the number of
+        /// coroutines awaited
+        task<std::size_t> wait_for_all() {
+            std::size_t count{};
+            while (live.size()) {
+                task_type t{std::move(live.back())};
+                live.pop_back();
+                co_await std::move(t);
+                ++count;
+            }
+            co_return count;
         }
 
       private:

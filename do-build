@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+time (
+        # User specified targets
+        ninja -C ./build.tmp/clang-debug $* &&
+        # Debug builds
+        ninja -C ./build.tmp/clang-debug all felspar-check &&
+        ninja -C ./build.tmp/gcc-debug all felspar-check &&
+        # Release builds
+        ninja -C ./build.tmp/clang-release all felspar-check &&
+        ninja -C ./build.tmp/gcc-release all felspar-check &&
+        true
+    ) && (
+        find ./examples/ ./include/ ./test/ -name \*.\?pp -print | xargs clang-format -i
+    )
