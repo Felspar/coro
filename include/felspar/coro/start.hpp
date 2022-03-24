@@ -12,11 +12,12 @@ namespace felspar::coro {
     template<typename Task = task<void>>
     class starter {
       public:
-        using promise_type = typename Task::promise_type;
+        using task_type = Task;
+        using promise_type = typename task_type::promise_type;
         using handle_type = typename promise_type::handle_type;
 
         template<typename... PArgs, typename... MArgs>
-        void post(coro::task<void> (*f)(PArgs...), MArgs &&...margs) {
+        void post(task_type (*f)(PArgs...), MArgs &&...margs) {
             auto task = f(std::forward<MArgs>(margs)...);
             auto coro = task.release();
             coro.resume();
