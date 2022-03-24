@@ -9,7 +9,7 @@
 namespace felspar::coro {
 
 
-    template<typename Task>
+    template<typename Task = task<void>>
     class starter {
       public:
         using promise_type = typename Task::promise_type;
