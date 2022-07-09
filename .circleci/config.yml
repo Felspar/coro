@@ -9,6 +9,14 @@ executors:
       CXX: clang++
       CXXFLAGS: "-stdlib=libc++"
       LD_FLAGS: "-stdlib=libc++"
+  clang-asan:
+    docker:
+    - image: kayess/cpp
+    environment:
+      CC: clang
+      CXX: clang++
+      CXXFLAGS: "-stdlib=libc++ -fsanitize=address"
+      LD_FLAGS: "-stdlib=libc++ -fsanitize=address"
   gcc:
     docker:
     - image: kayess/cpp
@@ -42,5 +50,5 @@ workflows:
       - build:
           matrix:
             parameters:
-              compiler: [gcc, clang]
+              compiler: [gcc, clang, clang-asan]
               variant: [Debug, Release]
