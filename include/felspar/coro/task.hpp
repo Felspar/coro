@@ -3,6 +3,7 @@
 
 #include <felspar/coro/allocator.hpp>
 #include <felspar/coro/coroutine.hpp>
+#include <felspar/exceptions.hpp>
 
 #include <optional>
 #include <stdexcept>
@@ -11,6 +12,8 @@
 namespace felspar::coro {
 
 
+    template<typename Task>
+    class starter;
     template<typename Y, typename Allocator = void>
     class task;
     template<typename Y, typename Allocator>
@@ -91,6 +94,7 @@ namespace felspar::coro {
 
     template<typename Y, typename Allocator>
     class [[nodiscard]] task final {
+        friend class starter<task>;
         friend struct task_promise<Y, Allocator>;
 
       public:
@@ -137,11 +141,9 @@ namespace felspar::coro {
 
         /// Or use this from a normal function
         value_type get() & = delete;
-        value_type get() && {
-            if (not coro) {
-                throw std::runtime_error{"No coroutine to resume"};
-            }
-            start();
+        value_type get(
+                source_location const &loc = source_location::current()) && {
+            start(loc);
             return coro.promise().consume_value();
         }
 
@@ -154,9 +156,10 @@ namespace felspar::coro {
       private:
         handle_type coro;
 
-        void start() {
+        void start(source_location const &loc = source_location::current()) {
             if (not coro) {
-                throw std::runtime_error{"Cannot start an empty task"};
+                throw stdexcept::runtime_error{
+                        "Cannot start an empty task", loc};
             } else if (not coro.promise().started) {
                 coro.promise().started = true;
                 coro.resume();

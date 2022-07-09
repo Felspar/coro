@@ -2,6 +2,7 @@
 
 
 #include <felspar/coro/task.hpp>
+#include <felspar/exceptions.hpp>
 
 #include <vector>
 
@@ -18,9 +19,10 @@ namespace felspar::coro {
 
         template<typename... PArgs, typename... MArgs>
         void post(task_type (*f)(PArgs...), MArgs &&...margs) {
+            static_assert(sizeof...(PArgs) == sizeof...(MArgs));
             auto task = f(std::forward<MArgs>(margs)...);
+            task.start();
             auto coro = task.release();
-            coro.resume();
             live.push_back(std::move(coro));
         }
 
@@ -65,6 +67,19 @@ namespace felspar::coro {
                 ++count;
             }
             co_return count;
+        }
+
+        /// The next item in line in the starter.
+        task_type next(source_location const &loc = source_location::current()) {
+            if (live.empty()) {
+                throw stdexcept::logic_error{
+                        "Cannot call starter::next() if there are no items",
+                        loc};
+            } else {
+                task_type t{std::move(live.back())};
+                live.pop_back();
+                return t;
+            }
         }
 
       private:
