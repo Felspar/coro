@@ -2,13 +2,19 @@
 
 time (
         # User specified targets
-        ninja -C ./build.tmp/clang-debug $* &&
+        ninja -C ./build.tmp/clang-debug-libc++ $* &&
         # Debug builds
-        ninja -C ./build.tmp/clang-debug all felspar-check &&
+        ninja -C ./build.tmp/clang-debug-libc++ all felspar-check &&
         ninja -C ./build.tmp/gcc-debug all felspar-check &&
         # Release builds
-        ninja -C ./build.tmp/clang-release all felspar-check &&
+        ninja -C ./build.tmp/clang-release-libc++ all felspar-check &&
         ninja -C ./build.tmp/gcc-release all felspar-check &&
+        # stdlib=libc++ asan
+        ninja -C ./build.tmp/clang-debug-asan all felspar-check &&
+        ninja -C ./build.tmp/clang-release-asan all felspar-check &&
+        # stdlib=libc++ asan force PMR
+        ninja -C ./build.tmp/clang-debug-pmr-asan all felspar-check &&
+        ninja -C ./build.tmp/clang-release-pmr-asan all felspar-check &&
         true
     ) && (
         find ./examples/ ./include/ ./test/ -name \*.\?pp -print | xargs clang-format -i

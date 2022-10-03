@@ -1,24 +1,47 @@
 #!/usr/bin/env bash
 cd $(dirname $0)
-mkdir -p build.tmp/{clang,gcc}-{debug,release}
 
 CMAKE="cmake -G Ninja ."
 
 
-CC=gcc-10 CXX=g++-10 $CMAKE -B build.tmp/gcc-debug \
+export CC=gcc
+export CXX=g++
+
+$CMAKE -B build.tmp/gcc-debug \
     -DCMAKE_INSTALL_PREFIX=dist/gcc-debug
 
-CC=gcc-10 CXX=g++-10 $CMAKE -B build.tmp/gcc-release \
+$CMAKE -B build.tmp/gcc-release \
     -DCMAKE_INSTALL_PREFIX=dist/gcc-release \
     -DCMAKE_BUILD_TYPE=Release
 
 
+export CC=clang
+export CXX=clang++
 export CXXFLAGS=-stdlib=libc++
-export LD_FLAGS=-stdlib=libc++
 
-CC=clang CXX=clang++ $CMAKE -B build.tmp/clang-debug \
-    -DCMAKE_INSTALL_PREFIX=dist/clang-debug
+$CMAKE -B build.tmp/clang-debug-libc++ \
+    -DCMAKE_INSTALL_PREFIX=dist/clang-debug-libc++
 
-CC=clang CXX=clang++ $CMAKE -B build.tmp/clang-release \
-    -DCMAKE_INSTALL_PREFIX=dist/clang-release \
+$CMAKE -B build.tmp/clang-release-libc++ \
+    -DCMAKE_INSTALL_PREFIX=dist/clang-release-libc++ \
     -DCMAKE_BUILD_TYPE=Release
+
+
+export CXXFLAGS="${CXXFLAGS} -fsanitize=address"
+
+$CMAKE -B build.tmp/clang-debug-asan \
+    -DCMAKE_INSTALL_PREFIX=dist/clang-debug-asan
+
+$CMAKE -B build.tmp/clang-release-asan \
+    -DCMAKE_INSTALL_PREFIX=dist/clang-release-asan \
+    -DCMAKE_BUILD_TYPE=Release
+
+
+$CMAKE -B build.tmp/clang-debug-pmr-asan \
+    -DCMAKE_INSTALL_PREFIX=dist/clang-debug-asan \
+    -DFELSPAR_FORCE_PMR=YES
+
+$CMAKE -B build.tmp/clang-release-pmr-asan \
+    -DCMAKE_INSTALL_PREFIX=dist/clang-release-asan \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DFELSPAR_FORCE_PMR=YES
