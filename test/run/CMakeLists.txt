@@ -3,6 +3,7 @@ if(TARGET felspar-check)
             generator.cpp
             lazy.cpp
             starter.cpp
+            stream.cpp
             task.cpp
         )
 endif()

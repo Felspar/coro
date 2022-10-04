@@ -13,6 +13,7 @@ executors:
     docker:
     - image: kayess/cpp
     environment:
+      ASAN_OPTIONS: alloc_dealloc_mismatch=0
       CC: clang
       CXX: clang++
       CXXFLAGS: "-stdlib=libc++ -fsanitize=address"
