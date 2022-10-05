@@ -52,6 +52,13 @@ check(t.next()).is_falsey();
 ```
 
 
+### `felspar::coro::mutex`
+
+Holding a normal `std::mutex` (or anything like it) across a suspension point in a coroutine is likely to cause a number of un-intended consequences -- especially if the coroutine can wake up in a different thread to the one it suspended in. This type provides a safe asynchronous mutex that can be used instead.
+
+
+
+
 ### `felspar::coro::task`
 
 A coroutine whose result must be awaited. Like the `lazy`, the coroutine is not started until the return value is `co_awaited`.
