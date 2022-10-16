@@ -51,7 +51,7 @@ namespace {
              * If the number we're checking against is too low then keep adding
              * the prime we're checking until.
              */
-            while (checking < value) { checking += prime; }
+            while (checking < *value) { checking += prime; }
             /**
              * We're now in one of two things situations:
              *
@@ -67,7 +67,7 @@ namespace {
              * this is lower down in the sieve, so we yield it to the next layer
              * up.
              */
-            if (checking > value) { co_yield *value; }
+            if (checking > *value) { co_yield *value; }
         }
     }
 }
