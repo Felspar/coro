@@ -17,6 +17,15 @@ $CMAKE -B build.tmp/gcc-release \
 
 export CC=clang
 export CXX=clang++
+
+$CMAKE -B build.tmp/clang-debug \
+    -DCMAKE_INSTALL_PREFIX=dist/clang-debug-libc++
+
+$CMAKE -B build.tmp/clang-release \
+    -DCMAKE_INSTALL_PREFIX=dist/clang-release-libc++ \
+    -DCMAKE_BUILD_TYPE=Release
+
+
 export CXXFLAGS=-stdlib=libc++
 
 $CMAKE -B build.tmp/clang-debug-libc++ \
