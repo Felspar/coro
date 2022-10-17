@@ -9,6 +9,9 @@ time (
         # Release builds
         ninja -C ./build.tmp/clang-release-libc++ all felspar-check &&
         ninja -C ./build.tmp/gcc-release all felspar-check &&
+        # libstdc++
+        ninja -C ./build.tmp/clang-debug all felspar-check &&
+        ninja -C ./build.tmp/clang-release all felspar-check &&
         # stdlib=libc++ asan
         ninja -C ./build.tmp/clang-debug-asan all felspar-check &&
         ninja -C ./build.tmp/clang-release-asan all felspar-check &&

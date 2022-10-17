@@ -11,7 +11,7 @@
 
 #include <felspar/coro/allocator.hpp>
 #include <felspar/coro/coroutine.hpp>
-#include <optional>
+#include <felspar/memory/holding_pen.hpp>
 
 
 namespace felspar::coro {
@@ -67,7 +67,10 @@ namespace felspar::coro {
             iterator &operator=(iterator &&i) = default;
             ~iterator() = default;
 
-            Y operator*() { return *std::exchange(coro.promise().value, {}); }
+            Y operator*() {
+                return static_cast<Y &&>(
+                        std::move(coro.promise().value).transfer_out().value());
+            }
 
             auto &operator++() {
                 coro.resume();
@@ -92,12 +95,13 @@ namespace felspar::coro {
         auto end() { return iterator{}; }
 
         /// Fetching values. Returns an empty `optional` when completed.
-        std::optional<Y> next() {
+        memory::holding_pen<Y> next() {
             coro.resume();
             if (coro.promise().eptr) {
                 std::rethrow_exception(coro.promise().eptr);
+            } else {
+                return std::move(coro.promise().value).transfer_out();
             }
-            return std::exchange(coro.promise().value, {});
         }
     };
 
@@ -107,7 +111,7 @@ namespace felspar::coro {
         using promise_allocator_impl<Allocator>::operator new;
         using promise_allocator_impl<Allocator>::operator delete;
 
-        std::optional<Y> value = {};
+        memory::holding_pen<Y> value = {};
         std::exception_ptr eptr = {};
 
         using handle_type = unique_handle<generator_promise>;
@@ -116,13 +120,13 @@ namespace felspar::coro {
         suspend_always await_transform(A &&) = delete; // Use stream
 
         auto yield_value(Y y) {
-            value = std::move(y);
+            value.emplace(std::move(y));
             return suspend_always{};
         }
         void unhandled_exception() { eptr = std::current_exception(); }
 
         auto return_void() {
-            value = {};
+            value.reset();
             return suspend_never{};
         }
 

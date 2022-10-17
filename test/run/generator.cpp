@@ -39,6 +39,18 @@ namespace {
         }
     }
 
+    struct move_only {
+        std::string text = "string";
+
+        move_only() {}
+        move_only(move_only const &) = delete;
+        move_only(move_only &&) = default;
+
+        move_only operator=(move_only const &) = delete;
+        move_only operator=(move_only &&) = delete;
+    };
+    felspar::coro::generator<move_only> mover() { co_yield move_only{}; }
+
 
     auto const gi =
             felspar::testsuite("generator/iteration")
@@ -76,12 +88,19 @@ namespace {
                                               "after "
                                               "yield"});
                           })
-                    .test("terminates", [](auto check) {
-                        std::vector<std::size_t> fibs{};
-                        for (auto f : take(10, fib())) { fibs.push_back(f); }
-                        check(fibs.size()) == 10u;
-                        check(fibs.front()) == 1u;
-                        check(fibs.back()) == 55u;
+                    .test("terminates",
+                          [](auto check) {
+                              std::vector<std::size_t> fibs{};
+                              for (auto f : take(10, fib())) {
+                                  fibs.push_back(f);
+                              }
+                              check(fibs.size()) == 10u;
+                              check(fibs.front()) == 1u;
+                              check(fibs.back()) == 55u;
+                          })
+                    .test("move_only", [](auto check) {
+                        auto moves = mover();
+                        for (auto &&mo : moves) { check(mo.text) == "string"; }
                     });
 
 
@@ -119,19 +138,25 @@ namespace {
                                               "after "
                                               "yield"});
                           })
-                    .test("terminates", [](auto check) {
-                        auto t = take(10, fib());
-                        check(t.next()) == 1u;
-                        check(t.next()) == 1u;
-                        check(t.next()) == 2u;
-                        check(t.next()) == 3u;
-                        check(t.next()) == 5u;
-                        check(t.next()) == 8u;
-                        check(t.next()) == 13u;
-                        check(t.next()) == 21u;
-                        check(t.next()) == 34u;
-                        check(t.next()) == 55u;
-                        check(t.next()).is_falsey();
+                    .test("terminates",
+                          [](auto check) {
+                              auto t = take(10, fib());
+                              check(t.next()) == 1u;
+                              check(t.next()) == 1u;
+                              check(t.next()) == 2u;
+                              check(t.next()) == 3u;
+                              check(t.next()) == 5u;
+                              check(t.next()) == 8u;
+                              check(t.next()) == 13u;
+                              check(t.next()) == 21u;
+                              check(t.next()) == 34u;
+                              check(t.next()) == 55u;
+                              check(t.next()).is_falsey();
+                          })
+                    .test("move_only", [](auto check) {
+                        auto m = mover();
+                        check(m.next()->text) == "string";
+                        check(m.next()).is_falsey();
                     });
 
 
