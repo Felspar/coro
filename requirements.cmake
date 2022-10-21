@@ -18,7 +18,7 @@ FetchContent_Declare(
         GIT_TAG main
     )
 FetchContent_GetProperties(felspar-exceptions)
-if(NOT felspar-memory_POPULATED)
+if(NOT felspar-exceptions_POPULATED)
     FetchContent_Populate(felspar-exceptions)
     add_subdirectory(${felspar-exceptions_SOURCE_DIR} ${felspar-exceptions_BINARY_DIR})
 endif()
