@@ -25,6 +25,14 @@ namespace felspar::coro {
             auto coro = task.release();
             live.push_back(std::move(coro));
         }
+        template<typename N, typename... PArgs, typename... MArgs>
+        void post(N &o, task_type (N::*f)(PArgs...), MArgs &&...margs) {
+            static_assert(sizeof...(PArgs) == sizeof...(MArgs));
+            auto task = (o.*f)(std::forward<MArgs>(margs)...);
+            task.start();
+            auto coro = task.release();
+            live.push_back(std::move(coro));
+        }
 
         /// The number of coroutines currently held by the starter
         [[nodiscard]] std::size_t size() const noexcept { return live.size(); }
