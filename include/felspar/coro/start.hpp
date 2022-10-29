@@ -27,7 +27,8 @@ namespace felspar::coro {
         }
 
         /// The number of coroutines currently held by the starter
-        std::size_t size() const noexcept { return live.size(); }
+        [[nodiscard]] std::size_t size() const noexcept { return live.size(); }
+        [[nodiscard]] bool empty() const noexcept { return live.empty(); }
 
         /// Garbage collect old coroutines ignoring any errors and return values
         void garbage_collect_completed() {
