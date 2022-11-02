@@ -46,7 +46,7 @@ namespace felspar::coro {
 
         /// Publish this value to all awaiting. Returns the number of coroutines
         /// that received it.
-        std::size_t push(T &&t) {
+        std::size_t push(T t) {
             current = std::move(t);
             std::swap(processing, waiting);
             std::size_t deliveries{};
