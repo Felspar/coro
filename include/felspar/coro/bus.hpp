@@ -49,11 +49,8 @@ namespace felspar::coro {
         std::size_t push(T t) {
             current = std::move(t);
             std::swap(processing, waiting);
-            std::size_t deliveries{};
-            for (auto h : processing) {
-                h.resume();
-                ++deliveries;
-            }
+            std::size_t const deliveries{processing.size()};
+            for (auto h : processing) { h.resume(); }
             processing.clear();
             return deliveries;
         }
