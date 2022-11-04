@@ -13,6 +13,8 @@ namespace felspar::coro {
 
 
     template<typename Task>
+    class eager;
+    template<typename Task>
     class starter;
     template<typename Y, typename Allocator = void>
     class task;
@@ -94,6 +96,7 @@ namespace felspar::coro {
 
     template<typename Y, typename Allocator>
     class [[nodiscard]] task final {
+        friend class eager<task>;
         friend class starter<task>;
         friend struct task_promise<Y, Allocator>;
 
