@@ -23,6 +23,13 @@ namespace felspar::coro {
             task.start();
             coro = task.release();
         }
+        template<typename N, typename... PArgs, typename... MArgs>
+        void post(N &o, task_type (N::*f)(PArgs...), MArgs &&...margs) {
+            static_assert(sizeof...(PArgs) == sizeof...(MArgs));
+            auto task = (o.*f)(std::forward<MArgs>(margs)...);
+            task.start();
+            coro = task.release();
+        }
 
         /// Return true if the task is already done
         bool done() const noexcept { return coro and coro.done(); }
