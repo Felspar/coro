@@ -1,6 +1,7 @@
 add_library(coro-headers-tests STATIC EXCLUDE_FROM_ALL
         allocator.cpp
         always.cpp
+        bus.cpp
         cancellable.cpp
         lazy.cpp
         start.cpp

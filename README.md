@@ -111,3 +111,8 @@ A basic lazily evaluated coroutine. Superficially very similar to a nullary lamb
 ### `felspar::coro::start`
 
 Starts and takes over ownership of new coroutines.
+
+
+### `felspar::coro::bus`
+
+A data bus that allows one or more coroutines to wait for a value to be produced.

@@ -1,5 +1,6 @@
 if(TARGET felspar-check)
     add_test_run(felspar-check felspar-coro TESTS
+            bus.cpp
             generator.cpp
             lazy.cpp
             starter.cpp
