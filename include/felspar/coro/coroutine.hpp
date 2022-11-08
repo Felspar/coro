@@ -83,7 +83,7 @@ namespace felspar::coro {
             if (continuation) {
                 return continuation;
             } else {
-                return noop_coroutine();
+                return std::noop_coroutine();
             }
         }
         void await_resume() const noexcept {}

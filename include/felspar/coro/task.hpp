@@ -35,9 +35,9 @@ namespace felspar::coro {
             if (eptr) { std::rethrow_exception(eptr); }
         }
         /// The continuation that is to run when the task is complete
-        coroutine_handle<> continuation = {};
+        std::coroutine_handle<> continuation = {};
 
-        auto initial_suspend() const noexcept { return suspend_always{}; }
+        auto initial_suspend() const noexcept { return std::suspend_always{}; }
         void unhandled_exception() noexcept { eptr = std::current_exception(); }
         auto final_suspend() noexcept {
             return symmetric_continuation{continuation};
@@ -84,7 +84,7 @@ namespace felspar::coro {
         value_type consume_value() {
             check_exception();
             if (not value.has_value()) {
-                throw std::runtime_error{
+                throw stdexcept::runtime_error{
                         "The task hasn't completed with a value "};
             }
             value_type rv = std::move(*value);
@@ -125,8 +125,8 @@ namespace felspar::coro {
                 bool await_ready() const noexcept {
                     return coro.promise().has_value();
                 }
-                coroutine_handle<>
-                        await_suspend(coroutine_handle<> awaiting) noexcept {
+                std::coroutine_handle<> await_suspend(
+                        std::coroutine_handle<> awaiting) noexcept {
                     coro.promise().continuation = awaiting;
                     if (not coro.promise().started) {
                         coro.promise().started = true;
@@ -134,7 +134,7 @@ namespace felspar::coro {
                     } else if (coro.promise().has_value()) {
                         return awaiting;
                     } else {
-                        return noop_coroutine();
+                        return std::noop_coroutine();
                     }
                 }
                 Y await_resume() { return coro.promise().consume_value(); }

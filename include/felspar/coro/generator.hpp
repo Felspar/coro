@@ -1,11 +1,3 @@
-/**
-    Copyright 2019-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #pragma once
 
 
@@ -117,24 +109,24 @@ namespace felspar::coro {
         using handle_type = unique_handle<generator_promise>;
 
         template<typename A>
-        suspend_always await_transform(A &&) = delete; // Use stream
+        std::suspend_always await_transform(A &&) = delete; // Use stream
 
         auto yield_value(Y y) {
             value.emplace(std::move(y));
-            return suspend_always{};
+            return std::suspend_always{};
         }
         void unhandled_exception() { eptr = std::current_exception(); }
 
         auto return_void() {
             value.reset();
-            return suspend_never{};
+            return std::suspend_never{};
         }
 
         auto get_return_object() {
             return generator<Y, Allocator>{handle_type::from_promise(*this)};
         }
-        auto initial_suspend() const noexcept { return suspend_always{}; }
-        auto final_suspend() const noexcept { return suspend_always{}; }
+        auto initial_suspend() const noexcept { return std::suspend_always{}; }
+        auto final_suspend() const noexcept { return std::suspend_always{}; }
     };
 
 

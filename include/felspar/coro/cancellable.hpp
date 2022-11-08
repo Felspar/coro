@@ -13,10 +13,10 @@ namespace felspar::coro {
      * Wait at the suspension point until resumed from an external location.
      */
     class cancellable {
-        std::vector<coroutine_handle<>> continuations = {};
+        std::vector<std::coroutine_handle<>> continuations = {};
         bool signalled = false;
 
-        void remove(coroutine_handle<> h) { std::erase(continuations, h); }
+        void remove(std::coroutine_handle<> h) { std::erase(continuations, h); }
 
       public:
         cancellable() {}
@@ -42,14 +42,14 @@ namespace felspar::coro {
             struct awaitable {
                 A a;
                 cancellable &b;
-                coroutine_handle<> continuation = {};
+                std::coroutine_handle<> continuation = {};
 
                 ~awaitable() { b.remove(continuation); }
 
                 bool await_ready() const noexcept {
                     return b.signalled or a.await_ready();
                 }
-                auto await_suspend(coroutine_handle<> h) noexcept {
+                auto await_suspend(std::coroutine_handle<> h) noexcept {
                     /// `h` is the coroutine making use of the `cancellable`
                     continuation = h;
                     b.continuations.push_back(h);
@@ -73,12 +73,12 @@ namespace felspar::coro {
         auto operator co_await() {
             struct awaitable {
                 cancellable &b;
-                coroutine_handle<> continuation = {};
+                std::coroutine_handle<> continuation = {};
 
                 ~awaitable() { b.remove(continuation); }
 
                 bool await_ready() const noexcept { return b.signalled; }
-                void await_suspend(coroutine_handle<> h) noexcept {
+                void await_suspend(std::coroutine_handle<> h) noexcept {
                     continuation = h;
                     b.continuations.push_back(h);
                 }
