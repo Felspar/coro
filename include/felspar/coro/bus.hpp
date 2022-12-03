@@ -28,6 +28,11 @@ namespace felspar::coro {
       public:
         bus() = default;
 
+        /// Returns true if there is anything currently waiting on a bus value, or if value processing is ongoing
+        bool has_clients() const noexcept {
+            return not waiting.empty() or not processing.empty();
+        }
+
         /// Return an awaitable for the next value
         auto next() {
             struct awaitable {
