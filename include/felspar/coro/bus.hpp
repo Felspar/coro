@@ -19,6 +19,10 @@ namespace felspar::coro {
      * The value type you used must be copyable. There is no thread
      * synchronisation, and waiting coroutines will be resumed in the same
      * thread that published the new value.
+     *
+     * This implementation is still a little dangerous because if the waiting
+     * coroutine is destroyed it doesn't get removed from the `waiting` list.
+     * This will cause UB.
      */
     template<typename T>
     class bus {
