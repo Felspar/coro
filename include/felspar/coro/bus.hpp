@@ -19,13 +19,9 @@ namespace felspar::coro {
      * The value type you used must be copyable. There is no thread
      * synchronisation, and waiting coroutines will be resumed in the same
      * thread that published the new value.
-     *
-     * This implementation is still a little dangerous because if the waiting
-     * coroutine is destroyed it doesn't get removed from the `waiting` list.
-     * This will cause UB.
      */
     template<typename T>
-    class bus {
+    class bus final {
         std::optional<T> current;
         std::vector<coroutine_handle<>> waiting, processing;
 
@@ -42,11 +38,23 @@ namespace felspar::coro {
         auto next() {
             struct awaitable {
                 bus &b;
+                coroutine_handle<> waiting_handle = {};
+                ~awaitable() {
+                    if (waiting_handle) {
+                        std::erase(b.waiting, waiting_handle);
+                        std::erase(b.processing, waiting_handle);
+                    }
+                }
+
                 bool await_ready() const noexcept { return false; }
                 void await_suspend(felspar::coro::coroutine_handle<> h) {
+                    waiting_handle = h;
                     b.waiting.push_back(h);
                 }
-                T const &await_resume() const { return *b.current; }
+                T const &await_resume() {
+                    waiting_handle = {};
+                    return *b.current;
+                }
             };
             return awaitable{*this};
         }
@@ -60,8 +68,11 @@ namespace felspar::coro {
             current = std::move(t);
             std::swap(processing, waiting);
             std::size_t const deliveries{processing.size()};
-            for (auto h : processing) { h.resume(); }
-            processing.clear();
+            while (not processing.empty()) {
+                auto handle = processing.back();
+                processing.pop_back();
+                handle.resume();
+            }
             return deliveries;
         }
     };
