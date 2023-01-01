@@ -13,7 +13,10 @@ namespace {
     felspar::coro::generator<std::size_t> fib() {
         std::size_t a{1}, b{1};
         co_yield 1u;
-        while (true) { co_yield a = std::exchange(b, a + b); }
+        while (true) {
+            a = std::exchange(b, a + b);
+            co_yield a;
+        }
     }
 
     felspar::coro::generator<std::size_t> thrower(bool after_yield) {
@@ -157,7 +160,10 @@ namespace {
             alloc_fib(felspar::memory::stack_storage<> &) {
         std::size_t a{1}, b{1};
         co_yield 1u;
-        while (true) { co_yield a = std::exchange(b, a + b); }
+        while (true) {
+            a = std::exchange(b, a + b);
+            co_yield a;
+        }
     }
 
 
