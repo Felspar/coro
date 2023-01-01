@@ -22,13 +22,13 @@ namespace {
         std::size_t read{};
         proc.post(copy_value, std::ref(read), std::ref(values));
 
-        check(read) == 0;
+        check(read) == 0u;
         check(values.latest().has_value()) == false;
 
         values.push(1);
-        check(read) == 1;
+        check(read) == 1u;
         check(values.latest().has_value()) == true;
-        check(*values.latest()) == 1;
+        check(*values.latest()) == 1u;
     });
 
 
