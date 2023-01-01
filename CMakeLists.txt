@@ -14,7 +14,10 @@ target_compile_features(felspar-coro INTERFACE cxx_std_20)
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
     target_compile_options(felspar-coro INTERFACE -fcoroutines-ts)
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    target_compile_options(felspar-coro INTERFACE -fcoroutines)
+    target_compile_options(felspar-coro INTERFACE
+            -fcoroutines
+            -Wno-mismatched-new-delete
+        )
 else()
     message(SEND_ERROR "Unknown compiler ID: ${CMAKE_CXX_COMPILER_ID}")
 endif()
