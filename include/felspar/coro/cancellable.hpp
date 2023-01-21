@@ -9,9 +9,7 @@
 namespace felspar::coro {
 
 
-    /**
-     * Wait at the suspension point until resumed from an external location.
-     */
+    /// ## Cancellable coroutines
     class cancellable {
         std::vector<coroutine_handle<>> continuations = {};
         bool signalled = false;

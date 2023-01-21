@@ -10,7 +10,7 @@
 namespace felspar::coro {
 
 
-    /// A data distribution bus
+    /// ## A data distribution bus
     /**
      * Data items can be fed into it and will be distributed to all of the
      * currently awaiting coroutines. The last value fed into it can also be
