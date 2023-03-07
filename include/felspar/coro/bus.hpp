@@ -28,13 +28,22 @@ namespace felspar::coro {
       public:
         bus() = default;
 
+
+        /// ### Query the bus
+
+        /// #### Clients
         /// Returns true if there is anything currently waiting on a bus value,
         /// or if value processing is ongoing
         bool has_clients() const noexcept {
             return not waiting.empty() or not processing.empty();
         }
 
-        /// Return an awaitable for the next value
+        /// #### The latest value
+        /// This will only be empty until the first value is pushed
+        std::optional<T> const &latest() const { return current; }
+
+
+        /// ### Return an awaitable for the next value
         auto next() {
             struct awaitable {
                 bus &b;
@@ -59,11 +68,15 @@ namespace felspar::coro {
             return awaitable{*this};
         }
 
-        /// The latest value
-        std::optional<T> const &latest() const { return current; }
 
-        /// Publish this value to all awaiting. Returns the number of coroutines
-        /// that received it.
+        /// ### Publish a value to all waiting coroutines
+        /**
+         * Returns the number of coroutines that received a copy of the message.
+         *
+         * Waiting coroutines are continued synchronously. This can lead to
+         * undefined behaviour if it is a coroutine that has pushed the value
+         * and the value causes the coroutine's stack frame to be destroyed.
+         */
         std::size_t push(T t) {
             current = std::move(t);
             std::swap(processing, waiting);
