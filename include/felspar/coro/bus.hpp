@@ -2,6 +2,7 @@
 
 
 #include <felspar/coro/coroutine.hpp>
+#include <felspar/coro/task.hpp>
 
 #include <optional>
 #include <vector>
@@ -87,6 +88,17 @@ namespace felspar::coro {
                 handle.resume();
             }
             return deliveries;
+        }
+
+
+        /// ### Forward values to another bus
+        template<typename F = T>
+        felspar::coro::task<void> forward(bus<F> &b) {
+            while (true) { b.push(co_await next()); }
+        }
+        template<typename F = T, typename Allocator>
+        felspar::coro::task<void, Allocator> forward(Allocator &, bus<F> &b) {
+            while (true) { b.push(co_await next()); }
         }
     };
 
