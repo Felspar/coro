@@ -2,6 +2,7 @@
 
 
 #include <felspar/coro/coroutine.hpp>
+#include <felspar/coro/stream.hpp>
 #include <felspar/coro/task.hpp>
 
 #include <optional>
@@ -69,6 +70,11 @@ namespace felspar::coro {
             return awaitable{*this};
         }
 
+
+        /// ### Return a stream of values coming from the bus
+        coro::stream<T> stream() {
+            while (true) { co_yield (co_await next()); }
+        }
 
         /// ### Publish a value to all waiting coroutines
         /**
