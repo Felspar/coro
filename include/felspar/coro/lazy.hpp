@@ -35,13 +35,17 @@ namespace felspar::coro {
             }
 
             template<typename A>
-            suspend_always await_transform(A &&) = delete;
+            std::suspend_always await_transform(A &&) = delete;
 
             void unhandled_exception() { eptr = std::current_exception(); }
             void return_value(L v) { value = std::move(v); }
 
-            auto initial_suspend() const noexcept { return suspend_always{}; }
-            auto final_suspend() const noexcept { return suspend_always{}; }
+            auto initial_suspend() const noexcept {
+                return std::suspend_always{};
+            }
+            auto final_suspend() const noexcept {
+                return std::suspend_always{};
+            }
         };
         friend promise_type;
 
