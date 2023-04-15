@@ -1,11 +1,3 @@
-/**
-    Copyright 2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include <felspar/coro/generator.hpp>
 #include <felspar/memory/stack.storage.hpp>
 #include <felspar/test.hpp>
@@ -21,7 +13,10 @@ namespace {
     felspar::coro::generator<std::size_t> fib() {
         std::size_t a{1}, b{1};
         co_yield 1u;
-        while (true) { co_yield a = std::exchange(b, a + b); }
+        while (true) {
+            a = std::exchange(b, a + b);
+            co_yield a;
+        }
     }
 
     felspar::coro::generator<std::size_t> thrower(bool after_yield) {
@@ -165,7 +160,10 @@ namespace {
             alloc_fib(felspar::memory::stack_storage<> &) {
         std::size_t a{1}, b{1};
         co_yield 1u;
-        while (true) { co_yield a = std::exchange(b, a + b); }
+        while (true) {
+            a = std::exchange(b, a + b);
+            co_yield a;
+        }
     }
 
 

@@ -34,6 +34,9 @@ namespace felspar::coro {
         /// Return true if the task is already done
         bool done() const noexcept { return coro and coro.done(); }
 
+        /// Release the held task so it can be `co_await`ed
+        auto release() && { return task_type(std::move(coro)); }
+
       private:
         handle_type coro;
     };
