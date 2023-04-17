@@ -2,6 +2,7 @@
 
 
 #include <felspar/coro/coroutine.hpp>
+#include <felspar/coro/stream.hpp>
 #include <felspar/coro/task.hpp>
 
 #include <optional>
@@ -67,6 +68,17 @@ namespace felspar::coro {
                 }
             };
             return awaitable{*this};
+        }
+
+
+        /// ### Return a stream of values coming from the bus
+        /**
+         * The stream will never terminate, but it is safe to delete so long as
+         * the deletion is not a result of a message sent to the stream. See the
+         * `push` member for more details
+         */
+        coro::stream<T> stream() {
+            while (true) { co_yield (co_await next()); }
         }
 
 
