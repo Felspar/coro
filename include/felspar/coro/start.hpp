@@ -10,6 +10,7 @@
 namespace felspar::coro {
 
 
+    /// ## Start and manage multiple coroutines
     template<typename Task = task<void>>
     class starter {
       public:
@@ -17,6 +18,7 @@ namespace felspar::coro {
         using promise_type = typename task_type::promise_type;
         using handle_type = typename promise_type::handle_type;
 
+        /// ### Start a new coroutine
         template<typename... PArgs, typename... MArgs>
         void post(task_type (*f)(PArgs...), MArgs &&...margs) {
             static_assert(sizeof...(PArgs) == sizeof...(MArgs));
@@ -34,11 +36,12 @@ namespace felspar::coro {
             live.push_back(std::move(coro));
         }
 
-        /// The number of coroutines currently held by the starter
+        /// ### The number of coroutines currently held by the starter
         [[nodiscard]] std::size_t size() const noexcept { return live.size(); }
         [[nodiscard]] bool empty() const noexcept { return live.empty(); }
 
-        /// Garbage collect old coroutines ignoring any errors and return values
+        /// ### Garbage collect old coroutines
+        /// Ignores any errors and return values.
         void garbage_collect_completed() {
             live.erase(
                     std::remove_if(
@@ -64,9 +67,11 @@ namespace felspar::coro {
                     live.end());
         }
 
-        /// Wait for all coroutines to complete, or for the first to throw an
-        /// exception. If no exception has happened then returns the number of
-        /// coroutines awaited
+        /// ### Wait for all coroutines to complete
+        /**
+         * Or for the first to throw an exception. If no exception has happened
+         * then returns the number of coroutines awaited.
+         */
         task<std::size_t> wait_for_all() {
             std::size_t count{};
             while (live.size()) {
@@ -78,7 +83,7 @@ namespace felspar::coro {
             co_return count;
         }
 
-        /// The next item in line in the starter.
+        /// ### The next item in line in the starter
         task_type next(source_location const &loc = source_location::current()) {
             if (live.empty()) {
                 throw stdexcept::logic_error{
