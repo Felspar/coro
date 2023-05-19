@@ -96,6 +96,13 @@ namespace felspar::coro {
             }
         }
 
+        /// ### Delete all coroutines
+        /**
+         * Invoking this from any of the running coroutines will invoke
+         * undefined behaviour.
+         */
+        void reset() { live.clear(); }
+
       private:
         std::vector<handle_type> live;
     };
