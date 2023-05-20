@@ -28,6 +28,8 @@ namespace felspar::coro {
         std::vector<coroutine_handle<>> waiting, processing;
 
       public:
+        using value_type = T;
+
         bus() = default;
 
 
