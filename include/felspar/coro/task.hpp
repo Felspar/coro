@@ -40,7 +40,7 @@ namespace felspar::coro {
         auto initial_suspend() const noexcept { return suspend_always{}; }
         void unhandled_exception() noexcept { eptr = std::current_exception(); }
         auto final_suspend() noexcept {
-            return symmetric_continuation{continuation};
+            return symmetric_continuation{std::exchange(continuation, {})};
         }
     };
     template<typename Allocator>
@@ -127,13 +127,14 @@ namespace felspar::coro {
                 }
                 coroutine_handle<>
                         await_suspend(coroutine_handle<> awaiting) noexcept {
-                    coro.promise().continuation = awaiting;
                     if (not coro.promise().started) {
+                        coro.promise().continuation = awaiting;
                         coro.promise().started = true;
                         return coro.get();
                     } else if (coro.promise().has_value()) {
                         return awaiting;
                     } else {
+                        coro.promise().continuation = awaiting;
                         return noop_coroutine();
                     }
                 }
