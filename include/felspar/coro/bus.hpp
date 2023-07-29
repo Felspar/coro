@@ -31,6 +31,11 @@ namespace felspar::coro {
         using value_type = T;
 
         bus() = default;
+        bus(bus &&) = default;
+        bus(bus const &) = delete;
+
+        bus &operator=(bus &&) = default;
+        bus &operator=(bus const &) = delete;
 
 
         /// ### Query the bus
