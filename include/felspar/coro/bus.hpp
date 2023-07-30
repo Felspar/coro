@@ -69,7 +69,7 @@ namespace felspar::coro {
                     waiting_handle = h;
                     b.waiting.push_back(h);
                 }
-                T const &await_resume() {
+                T &await_resume() {
                     waiting_handle = {};
                     return *b.current;
                 }
