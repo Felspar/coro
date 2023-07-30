@@ -4,7 +4,6 @@
 #include <felspar/coro/coroutine.hpp>
 #include <felspar/coro/stream.hpp>
 #include <felspar/coro/task.hpp>
-#include <felspar/prefer_copy.hpp>
 
 #include <optional>
 #include <vector>
@@ -50,11 +49,7 @@ namespace felspar::coro {
 
         /// #### The latest value
         /// This will only be empty until the first value is pushed
-        std::optional<T> const &latest() const
-            requires(prefer_copy<T>)
-        {
-            return current;
-        }
+        std::optional<T> const &latest() const { return current; }
 
 
         /// ### Return an awaitable for the next value
@@ -74,17 +69,9 @@ namespace felspar::coro {
                     waiting_handle = h;
                     b.waiting.push_back(h);
                 }
-                T const &await_resume()
-                    requires(prefer_copy<T>)
-                {
+                T &await_resume() {
                     waiting_handle = {};
                     return *b.current;
-                }
-                T await_resume()
-                    requires(not prefer_copy<T>)
-                {
-                    waiting_handle = {};
-                    return std::move(*b.current);
                 }
             };
             return awaitable{*this};
