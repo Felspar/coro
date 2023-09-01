@@ -7,7 +7,7 @@
 namespace felspar::coro {
 
 
-    /// Immediately launch a coroutine and then own it
+    /// ## Immediately launch a single coroutine
     template<typename Task = task<void>>
     class eager {
       public:
@@ -15,7 +15,8 @@ namespace felspar::coro {
         using promise_type = typename task_type::promise_type;
         using handle_type = typename promise_type::handle_type;
 
-        /// Start a task immediately
+
+        /// ### Start a task immediately
         template<typename... PArgs, typename... MArgs>
         void post(task_type (*f)(PArgs...), MArgs &&...margs) {
             static_assert(sizeof...(PArgs) == sizeof...(MArgs));
@@ -31,11 +32,18 @@ namespace felspar::coro {
             coro = task.release();
         }
 
-        /// Return true if the task is already done
+
+        /// ### Lifetime
+
+        /// #### Return true if the task is already done
         bool done() const noexcept { return coro and coro.done(); }
 
-        /// Release the held task so it can be `co_await`ed
+        /// #### Release the held task so it can be `co_await`ed
         auto release() && { return task_type(std::move(coro)); }
+
+        /// #### Destroy the contained coroutine
+        auto destroy() { coro.release(); }
+
 
       private:
         handle_type coro;
