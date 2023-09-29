@@ -24,7 +24,7 @@ namespace felspar::coro {
      */
     template<typename T>
     class future {
-        std::optional<T> value;
+        std::optional<T> m_value;
         std::vector<coroutine_handle<>> continuations;
 
 
@@ -33,8 +33,25 @@ namespace felspar::coro {
 
 
         /// ### Query the future
-        bool has_value() const noexcept { return value.has_value(); }
+        bool has_value() const noexcept { return m_value.has_value(); }
         explicit operator bool() const noexcept { return has_value(); }
+
+        value_type &value() {
+            if (not m_value) {
+                throw felspar::stdexcept::logic_error{
+                        "Future does not contain a value"};
+            } else {
+                return *m_value;
+            }
+        }
+        value_type const &value() const {
+            if (not m_value) {
+                throw felspar::stdexcept::logic_error{
+                        "Future does not contain a value"};
+            } else {
+                return *m_value;
+            }
+        }
 
 
         /// ### Coroutine interface
@@ -45,7 +62,7 @@ namespace felspar::coro {
                 void await_suspend(coroutine_handle<> h) {
                     future.continuations.push_back(h);
                 }
-                value_type &await_resume() { return *future.value; }
+                value_type &await_resume() { return *future.m_value; }
             };
             return awaitable{*this};
         }
@@ -53,11 +70,11 @@ namespace felspar::coro {
 
         /// ### Set the future's value
         void set_value(value_type t) {
-            if (value) {
+            if (m_value) {
                 throw stdexcept::logic_error{
                         "The future already has a value set"};
             }
-            value = std::move(t);
+            m_value = std::move(t);
             for (auto h : continuations) { h.resume(); }
             continuations = {};
         }
