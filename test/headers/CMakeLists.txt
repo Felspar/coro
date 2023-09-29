@@ -4,6 +4,7 @@ add_library(coro-headers-tests STATIC EXCLUDE_FROM_ALL
         bus.cpp
         cancellable.cpp
         eager.cpp
+        future.cpp
         lazy.cpp
         start.cpp
         task.cpp

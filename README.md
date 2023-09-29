@@ -116,3 +116,8 @@ Starts and takes over ownership of new coroutines. `starter` can control many co
 ### `felspar::coro::bus`
 
 A data bus that allows one or more coroutines to wait for a value to be produced.
+
+
+### `felspar::coro::future`
+
+An asynchronous future that can be set and read from non-coroutines, but also awaited.
