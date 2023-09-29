@@ -3,6 +3,7 @@
 
 #include <felspar/coro/coroutine.hpp>
 #include <felspar/exceptions.hpp>
+#include <felspar/test/source.hpp>
 
 #include <optional>
 #include <vector>
@@ -36,18 +37,20 @@ namespace felspar::coro {
         bool has_value() const noexcept { return m_value.has_value(); }
         explicit operator bool() const noexcept { return has_value(); }
 
-        value_type &value() {
+        value_type &
+                value(source_location const &loc = source_location::current()) {
             if (not m_value) {
                 throw felspar::stdexcept::logic_error{
-                        "Future does not contain a value"};
+                        "Future does not contain a value", loc};
             } else {
                 return *m_value;
             }
         }
-        value_type const &value() const {
+        value_type const &value(
+                source_location const &loc = source_location::current()) const {
             if (not m_value) {
                 throw felspar::stdexcept::logic_error{
-                        "Future does not contain a value"};
+                        "Future does not contain a value", loc};
             } else {
                 return *m_value;
             }
@@ -69,10 +72,12 @@ namespace felspar::coro {
 
 
         /// ### Set the future's value
-        void set_value(value_type t) {
+        void set_value(
+                value_type t,
+                source_location const &loc = source_location::current()) {
             if (m_value) {
                 throw stdexcept::logic_error{
-                        "The future already has a value set"};
+                        "The future already has a value set", loc};
             }
             m_value = std::move(t);
             for (auto h : continuations) { h.resume(); }
