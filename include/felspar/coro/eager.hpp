@@ -20,16 +20,16 @@ namespace felspar::coro {
         template<typename... PArgs, typename... MArgs>
         void post(task_type (*f)(PArgs...), MArgs &&...margs) {
             static_assert(sizeof...(PArgs) == sizeof...(MArgs));
-            auto task = f(std::forward<MArgs>(margs)...);
-            task.start();
-            coro = task.release();
+            post(f(std::forward<MArgs>(margs)...));
         }
         template<typename N, typename... PArgs, typename... MArgs>
         void post(N &o, task_type (N::*f)(PArgs...), MArgs &&...margs) {
             static_assert(sizeof...(PArgs) == sizeof...(MArgs));
-            auto task = (o.*f)(std::forward<MArgs>(margs)...);
-            task.start();
-            coro = task.release();
+            post((o.*f)(std::forward<MArgs>(margs)...));
+        }
+        void post(task_type t) {
+            t.start();
+            coro = t.release();
         }
 
 
