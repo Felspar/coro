@@ -12,7 +12,7 @@ add_library(felspar-coro INTERFACE)
 target_include_directories(felspar-coro INTERFACE include)
 target_compile_features(felspar-coro INTERFACE cxx_std_20)
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
-    target_compile_options(felspar-coro INTERFACE -fcoroutines-ts)
+    target_compile_options(felspar-coro INTERFACE -fcoroutines-ts -Wno-deprecated-experimental-coroutine)
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     target_compile_options(felspar-coro INTERFACE
             -fcoroutines
