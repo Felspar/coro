@@ -17,6 +17,8 @@ namespace felspar::coro {
 
 
         /// ### Start a task immediately
+        eager() {}
+        explicit eager(task_type t) { post(std::move(t)); }
         template<typename... PArgs, typename... MArgs>
         void post(task_type (*f)(PArgs...), MArgs &&...margs) {
             static_assert(sizeof...(PArgs) == sizeof...(MArgs));
