@@ -2,6 +2,10 @@
 
 **C++ coroutine library and toolkit**
 
+[![Documentation](https://badgen.net/static/docs/felspar.com)](https://felspar.com/coro/)
+[![GitHub](https://badgen.net/badge/Github/felspar-coro/green?icon=github)](https://github.com/Felspar/coro)
+[![License](https://badgen.net/github/license/Felspar/coro)](https://github.com/Felspar/coro/blob/main/LICENSE_1_0.txt)
+[![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/tKSabUa52v)
 
 **felspar-coro** is a C++20 library to help you to use coroutines in your own libraries and applications. You should be able to use it with a recent clang or gcc compiler on Unix systems (e.g. Linux and Mac).
 
