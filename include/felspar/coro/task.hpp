@@ -3,6 +3,7 @@
 
 #include <felspar/coro/allocator.hpp>
 #include <felspar/coro/coroutine.hpp>
+#include <felspar/coro/forward.hpp>
 #include <felspar/exceptions.hpp>
 
 #include <optional>
@@ -10,16 +11,6 @@
 
 
 namespace felspar::coro {
-
-
-    template<typename Task>
-    class eager;
-    template<typename Task>
-    class starter;
-    template<typename Y, typename Allocator = void>
-    class task;
-    template<typename Y, typename Allocator>
-    struct task_promise;
 
 
     template<typename Allocator>
