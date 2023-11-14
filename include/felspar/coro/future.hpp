@@ -14,7 +14,10 @@ namespace felspar::coro {
 
     /// ## Asynchronous future
     /**
-     * An nopn-thread safe asynchronous future.
+     * A non-thread safe asynchronous future. This type is not used to define a
+     * coroutine (like a [task](./task.hpp) is), but is used to enable
+     * communication to coroutines from other parts of the code. Typically you
+     * will find this type as an instance in a data structure.
      *
      * It is able to have multiple coroutines wait on the future, with them all
      * being resumed when a value is pushed. If the value has already been set
