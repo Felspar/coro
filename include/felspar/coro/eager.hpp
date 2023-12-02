@@ -44,7 +44,9 @@ namespace felspar::coro {
         auto release() && { return task_type(std::move(coro)); }
 
         /// #### Destroy the contained coroutine
-        auto destroy() { coro.release(); }
+        auto destroy() {
+            if (auto h = coro.release(); h) { h.destroy(); }
+        }
 
 
       private:
