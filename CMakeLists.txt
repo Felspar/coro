@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12...3.28)
+cmake_minimum_required(VERSION 3.14...3.28)
 project(felspar-coro LANGUAGES CXX)
 enable_testing()
 
@@ -38,7 +38,7 @@ add_library(felspar-coro INTERFACE)
 target_include_directories(felspar-coro INTERFACE include)
 target_compile_options(felspar-coro INTERFACE ${coro_opt})
 target_link_libraries(felspar-coro INTERFACE felspar-memory)
-install(DIRECTORY include/felspar DESTINATION include)
+install(DIRECTORY include/felspar TYPE INCLUDE)
 
 if(TARGET felspar-examples)
     add_subdirectory(examples)
