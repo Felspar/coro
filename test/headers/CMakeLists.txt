@@ -9,5 +9,5 @@ add_library(coro-headers-tests STATIC EXCLUDE_FROM_ALL
         start.cpp
         task.cpp
     )
-target_link_libraries(coro-headers-tests felspar-coro)
+target_link_libraries(coro-headers-tests PRIVATE felspar-coro)
 add_dependencies(felspar-check coro-headers-tests)
