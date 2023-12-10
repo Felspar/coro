@@ -87,6 +87,60 @@ namespace felspar::coro {
             continuations = {};
         }
     };
+    template<>
+    class future<void> {
+        bool m_has_value = false;
+        std::vector<coroutine_handle<>> continuations;
+
+
+      public:
+        using value_type = void;
+
+
+        /// ### Query the future
+        bool has_value() const noexcept { return m_has_value; }
+        explicit operator bool() const noexcept { return has_value(); }
+
+        void value(source_location const &loc = source_location::current()) {
+            if (not m_has_value) {
+                throw felspar::stdexcept::logic_error{
+                        "Future does not contain a value", loc};
+            }
+        }
+        void value(
+                source_location const &loc = source_location::current()) const {
+            if (not m_has_value) {
+                throw felspar::stdexcept::logic_error{
+                        "Future does not contain a value", loc};
+            }
+        }
+
+
+        /// ### Coroutine interface
+        auto operator co_await() {
+            struct awaitable {
+                coro::future<void> &future;
+                bool await_ready() const noexcept { return future.has_value(); }
+                void await_suspend(coroutine_handle<> h) {
+                    future.continuations.push_back(h);
+                }
+                void await_resume() const noexcept {}
+            };
+            return awaitable{*this};
+        }
+
+
+        /// ### Set the future's value
+        void set_value(source_location const &loc = source_location::current()) {
+            if (m_has_value) {
+                throw stdexcept::logic_error{
+                        "The future already has a value set", loc};
+            }
+            m_has_value = true;
+            for (auto h : continuations) { h.resume(); }
+            continuations = {};
+        }
+    };
 
 
 }
