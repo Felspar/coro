@@ -2,16 +2,6 @@ cmake_minimum_required(VERSION 3.14...3.28)
 project(felspar-coro LANGUAGES CXX)
 enable_testing()
 
-include(CheckCXXSymbolExists)
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|NVHPC")
-  set(CMAKE_REQUIRED_FLAGS -fcoroutines)
-endif()
-
-check_cxx_symbol_exists(__cpp_impl_coroutine "" have_coroutine)
-check_cxx_symbol_exists(__cpp_lib_coroutine "coroutine" have_coroutine_lib)
-if(NOT (have_coroutine AND have_coroutine_lib))
-  message(WARNING "C++20 coroutine support not detected.")
-endif()
 
 if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
     add_custom_target(felspar-check)
