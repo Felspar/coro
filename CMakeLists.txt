@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.14...3.28)
 project(felspar-coro LANGUAGES CXX)
 enable_testing()
 
-set(CMAKE_CXX_STANDARD 20)
-
 include(CheckCXXSymbolExists)
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|NVHPC")
   set(CMAKE_REQUIRED_FLAGS -fcoroutines)
@@ -36,6 +34,7 @@ endif()
 
 add_library(felspar-coro INTERFACE)
 target_include_directories(felspar-coro INTERFACE include)
+target_compile_features(felspar-coro INTERFACE cxx_std_20)
 target_compile_options(felspar-coro INTERFACE ${coro_opt})
 target_link_libraries(felspar-coro INTERFACE felspar-memory)
 install(DIRECTORY include/felspar TYPE INCLUDE)
