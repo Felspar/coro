@@ -125,3 +125,8 @@ A data bus that allows one or more coroutines to wait for a value to be produced
 ### `felspar::coro::future`
 
 An asynchronous future that can be set and read from non-coroutines, but also awaited.
+
+
+## Debugging
+
+* There's a useful clang document about [debugging coroutines with gdb](https://clang.llvm.org/docs/DebuggingCoroutines.html).
