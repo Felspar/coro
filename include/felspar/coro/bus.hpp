@@ -58,14 +58,24 @@ namespace felspar::coro {
         /// ### Return an awaitable for the next value
         auto next() {
             struct awaitable {
-                bus &b;
-                coroutine_handle<> waiting_handle = {};
+                awaitable(bus &bb) : b{bb} {}
+                awaitable(awaitable const &) = delete;
+                // TODO We could be movable
+                awaitable(awaitable &&) = delete;
                 ~awaitable() {
                     if (waiting_handle) {
                         std::erase(b.waiting, waiting_handle);
                         std::erase(b.processing, waiting_handle);
                     }
                 }
+
+                awaitable &operator=(awaitable const &) = delete;
+                awaitable &operator=(awaitable &&) = delete;
+
+
+                bus &b;
+                coroutine_handle<> waiting_handle = {};
+
 
                 bool await_ready() const noexcept { return false; }
                 void await_suspend(felspar::coro::coroutine_handle<> h) {
