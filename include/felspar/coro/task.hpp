@@ -85,11 +85,13 @@ namespace felspar::coro {
     };
 
 
+    /// ## Tasks
     template<typename Y, typename Allocator>
     class [[nodiscard]] task final {
         friend class eager<task>;
         friend class starter<task>;
         friend struct task_promise<Y, Allocator>;
+
 
       public:
         using value_type = Y;
@@ -97,22 +99,33 @@ namespace felspar::coro {
         using promise_type = task_promise<value_type, allocator_type>;
         using handle_type = typename promise_type::handle_type;
 
-        /// Construct a new task from a previously released one
+
+        /// ### Construction
+
+        /// #### Construct a new task from a previously released one
         explicit task(handle_type h) : coro{std::move(h)} {}
 
-        /// Not copyable
+
+        /// #### Not copyable
         task(task const &) = delete;
         task &operator=(task const &) = delete;
-        /// Movable
+        /// #### Movable
         task(task &&t) noexcept = default;
         task &operator=(task &&t) noexcept = default;
         ~task() = default;
 
-        /// Coroutine and awaitable
+
+        /// ### Awaitable
         auto operator co_await() & = delete;
         auto operator co_await() && {
+            /**
+             * The awaitable takes over ownership of the coroutine handle once
+             * its been created. This ensures that the lifetime of the promise
+             * is long enough to deliver the return value.
+             */
             struct awaitable {
                 handle_type coro;
+
                 bool await_ready() const noexcept {
                     return coro.promise().has_value();
                 }
@@ -134,7 +147,8 @@ namespace felspar::coro {
             return awaitable{std::move(coro)};
         }
 
-        /// Or use this from a normal function
+
+        /// ### Or use this from a normal function
         value_type get() & = delete;
         value_type get(
                 source_location const &loc = source_location::current()) && {
@@ -142,11 +156,13 @@ namespace felspar::coro {
             return coro.promise().consume_value();
         }
 
-        /// Or take on responsibility for the coroutine
+
+        /// ### Or take on responsibility for the coroutine
         handle_type release() {
             auto c = std::move(coro);
             return c;
         }
+
 
       private:
         handle_type coro;
