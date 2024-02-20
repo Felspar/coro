@@ -117,9 +117,8 @@ namespace felspar::coro {
         }
         void unhandled_exception() { eptr = std::current_exception(); }
 
-        auto return_void() {
+        void return_void() {
             value.reset();
-            return suspend_never{};
         }
 
         auto get_return_object() {

@@ -62,10 +62,9 @@ namespace felspar::coro {
             completed = true;
             value.reset();
         }
-        auto return_void() {
+        void return_void() {
             completed = true;
             value.reset();
-            return suspend_never{};
         }
 
         auto get_return_object() {
