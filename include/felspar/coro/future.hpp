@@ -79,7 +79,9 @@ namespace felspar::coro {
                 coroutine_handle<> mine = {};
 
 
-                bool await_ready() const noexcept { return lfuture.has_value(); }
+                bool await_ready() const noexcept {
+                    return lfuture.has_value();
+                }
                 void await_suspend(coroutine_handle<> h) {
                     mine = h;
                     lfuture.continuations.push_back(h);
@@ -155,7 +157,9 @@ namespace felspar::coro {
                 coroutine_handle<> mine = {};
 
 
-                bool await_ready() const noexcept { return lfuture.has_value(); }
+                bool await_ready() const noexcept {
+                    return lfuture.has_value();
+                }
                 void await_suspend(coroutine_handle<> h) {
                     mine = h;
                     lfuture.continuations.push_back(h);
