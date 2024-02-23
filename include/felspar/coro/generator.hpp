@@ -117,10 +117,7 @@ namespace felspar::coro {
         }
         void unhandled_exception() { eptr = std::current_exception(); }
 
-        auto return_void() {
-            value.reset();
-            return suspend_never{};
-        }
+        void return_void() { value.reset(); }
 
         auto get_return_object() {
             return generator<Y, Allocator>{handle_type::from_promise(*this)};
