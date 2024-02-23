@@ -63,32 +63,30 @@ namespace felspar::coro {
         /// ### Coroutine interface
         auto operator co_await() {
             struct awaitable {
-                explicit awaitable(coro::future<value_type> &f) : lfuture{f} {}
+                explicit awaitable(coro::future<value_type> &f) : fut{f} {}
                 awaitable(awaitable const &) = delete;
                 // TODO We could be movable
                 awaitable(awaitable &&) = delete;
                 ~awaitable() {
-                    if (mine) { std::erase(lfuture.continuations, mine); }
+                    if (mine) { std::erase(fut.continuations, mine); }
                 }
 
                 awaitable &operator=(awaitable const &) = delete;
                 awaitable &operator=(awaitable &&) = delete;
 
 
-                coro::future<value_type> &lfuture;
+                coro::future<value_type> &fut;
                 coroutine_handle<> mine = {};
 
 
-                bool await_ready() const noexcept {
-                    return lfuture.has_value();
-                }
+                bool await_ready() const noexcept { return fut.has_value(); }
                 void await_suspend(coroutine_handle<> h) {
                     mine = h;
-                    lfuture.continuations.push_back(h);
+                    fut.continuations.push_back(h);
                 }
                 value_type &await_resume() {
                     mine = {};
-                    return *lfuture.m_value;
+                    return *fut.m_value;
                 }
             };
             return awaitable{*this};
@@ -141,28 +139,26 @@ namespace felspar::coro {
         /// ### Coroutine interface
         auto operator co_await() {
             struct awaitable {
-                explicit awaitable(coro::future<void> &f) : lfuture{f} {}
+                explicit awaitable(coro::future<void> &f) : fut{f} {}
                 awaitable(awaitable const &) = delete;
                 // TODO We could be movable
                 awaitable(awaitable &&) = delete;
                 ~awaitable() {
-                    if (mine) { std::erase(lfuture.continuations, mine); }
+                    if (mine) { std::erase(fut.continuations, mine); }
                 }
 
                 awaitable &operator=(awaitable const &) = delete;
                 awaitable &operator=(awaitable &&) = delete;
 
 
-                coro::future<void> &lfuture;
+                coro::future<void> &fut;
                 coroutine_handle<> mine = {};
 
 
-                bool await_ready() const noexcept {
-                    return lfuture.has_value();
-                }
+                bool await_ready() const noexcept { return fut.has_value(); }
                 void await_suspend(coroutine_handle<> h) {
                     mine = h;
-                    lfuture.continuations.push_back(h);
+                    fut.continuations.push_back(h);
                 }
                 void await_resume() noexcept { mine = {}; }
             };
