@@ -5,6 +5,8 @@
 #include <felspar/coro/coroutine.hpp>
 #include <felspar/memory/holding_pen.hpp>
 
+#include <exception>
+
 
 namespace felspar::coro {
 

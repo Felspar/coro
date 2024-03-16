@@ -6,6 +6,7 @@
 #include <felspar/coro/forward.hpp>
 #include <felspar/exceptions.hpp>
 
+#include <exception>
 #include <optional>
 #include <stdexcept>
 
