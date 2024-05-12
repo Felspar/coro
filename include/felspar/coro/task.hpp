@@ -73,7 +73,7 @@ namespace felspar::coro {
         bool has_value() const noexcept { return value or eptr; }
         void return_value(value_type y) { value = std::move(y); }
 
-        value_type consume_value() {
+        FELSPAR_CORO_WRAPPER value_type consume_value() {
             check_exception();
             if (not value.has_value()) {
                 throw std::runtime_error{
@@ -88,7 +88,7 @@ namespace felspar::coro {
 
     /// ## Tasks
     template<typename Y, typename Allocator>
-    class [[nodiscard]] task final {
+    class [[nodiscard]] FELSPAR_CORO_CRT task final {
         friend class eager<task>;
         friend class starter<task>;
         friend struct task_promise<Y, Allocator>;
@@ -118,13 +118,13 @@ namespace felspar::coro {
 
         /// ### Awaitable
         auto operator co_await() & = delete;
-        auto operator co_await() && {
+        FELSPAR_CORO_WRAPPER auto operator co_await() && {
             /**
              * The awaitable takes over ownership of the coroutine handle once
              * its been created. This ensures that the lifetime of the promise
              * is long enough to deliver the return value.
              */
-            struct awaitable {
+            struct FELSPAR_CORO_CRT awaitable {
                 handle_type coro;
 
                 bool await_ready() const noexcept {
@@ -143,7 +143,9 @@ namespace felspar::coro {
                         return noop_coroutine();
                     }
                 }
-                Y await_resume() { return coro.promise().consume_value(); }
+                FELSPAR_CORO_WRAPPER Y await_resume() {
+                    return coro.promise().consume_value();
+                }
             };
             return awaitable{std::move(coro)};
         }

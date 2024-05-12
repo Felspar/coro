@@ -41,7 +41,9 @@ namespace felspar::coro {
         bool done() const noexcept { return coro and coro.done(); }
 
         /// #### Release the held task so it can be `co_await`ed
-        auto release() && { return task_type(std::move(coro)); }
+        FELSPAR_CORO_WRAPPER auto release() && {
+            return task_type(std::move(coro));
+        }
 
         /// #### Destroy the contained coroutine
         auto destroy() {

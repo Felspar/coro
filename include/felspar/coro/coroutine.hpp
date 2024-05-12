@@ -40,6 +40,22 @@ namespace felspar::coro {
 #endif
 
 
+#if defined __has_attribute
+#if false and __has_attribute(coro_return_type) \
+        and __has_attribute(coro_lifetimebound) \
+        and __has_attribute(coro_wrapper)
+#define FELSPAR_CORO_CRT [[clang::coro_return_type, clang::coro_lifetimebound]]
+#define FELSPAR_CORO_WRAPPER [[clang::coro_wrapper]]
+#endif
+#endif
+#if not defined FELSPAR_CORO_CRT
+#define FELSPAR_CORO_CRT
+#endif
+#if not defined FELSPAR_CORO_WRAPPER
+#define FELSPAR_CORO_WRAPPER
+#endif
+
+
 namespace felspar::coro {
 
 

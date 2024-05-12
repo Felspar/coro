@@ -18,7 +18,7 @@ namespace felspar::coro {
 
 
     template<typename Y, typename Allocator = void>
-    class stream final {
+    class FELSPAR_CORO_CRT stream final {
         friend struct stream_promise<Y, Allocator>;
         using handle_type = typename stream_promise<Y, Allocator>::handle_type;
         handle_type yielding_coro;
@@ -38,7 +38,7 @@ namespace felspar::coro {
         stream &operator=(stream &&t) noexcept = default;
         ~stream() = default;
 
-        stream_awaitable<Y, handle_type> next();
+        FELSPAR_CORO_WRAPPER stream_awaitable<Y, handle_type> next();
     };
 
 
