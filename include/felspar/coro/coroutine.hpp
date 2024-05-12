@@ -13,21 +13,6 @@ namespace felspar::coro {
     using suspend_always = std::suspend_always;
     using suspend_never = std::suspend_never;
 }
-/**
-Super bad idea, but the sort of thing that would be needed to make
-clang work with libstdc++ as clang seems to be hard coded to look
-in the experimental namespace for things.
-```cpp
-namespace std::experimental {
-    template<typename T = void>
-    using coroutine_handle = std::coroutine_handle<T>;
-    template<typename... Ts>
-    using coroutine_traits = std::coroutine_traits<Ts...>;
-    using suspend_always = std::suspend_always;
-    using suspend_never = std::suspend_never;
-}
-```
-*/
 #else
 #include <experimental/coroutine>
 namespace felspar::coro {
