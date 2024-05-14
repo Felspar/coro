@@ -26,7 +26,8 @@ namespace felspar::coro {
 
 
 #if defined __has_attribute
-#if false and __has_attribute(coro_return_type) \
+#if not defined FELSPAR_CORO_SKIP_LIFETIME_CHECKS \
+        and __has_attribute(coro_return_type) \
         and __has_attribute(coro_lifetimebound) \
         and __has_attribute(coro_wrapper)
 #define FELSPAR_CORO_CRT [[clang::coro_return_type, clang::coro_lifetimebound]]
