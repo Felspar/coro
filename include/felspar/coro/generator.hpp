@@ -18,7 +18,7 @@ namespace felspar::coro {
     /// A coroutine based generator. Values may be iterated (`begin`/`end`), or
     /// values may be fetched (`next`), but not both.
     template<typename Y, typename Allocator = void>
-    class generator final {
+    class FELSPAR_CORO_CRT generator final {
         friend struct generator_promise<Y, Allocator>;
         using handle_type =
                 typename generator_promise<Y, Allocator>::handle_type;
@@ -61,6 +61,7 @@ namespace felspar::coro {
             iterator &operator=(iterator &&i) = default;
             ~iterator() = default;
 
+
             Y operator*() {
                 return static_cast<Y &&>(
                         std::move(coro.promise().value).transfer_out().value());
@@ -72,6 +73,7 @@ namespace felspar::coro {
                 if (not coro.promise().value) { coro = {}; }
                 return *this;
             }
+
 
             friend bool operator==(iterator const &l, iterator const &r) {
                 if (not l.coro && not r.coro) {
@@ -87,6 +89,7 @@ namespace felspar::coro {
         };
         auto begin() { return iterator{this}; }
         auto end() { return iterator{}; }
+
 
         /// Fetching values. Returns an empty `optional` when completed.
         memory::holding_pen<Y> next() {

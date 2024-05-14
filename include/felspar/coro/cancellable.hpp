@@ -23,6 +23,8 @@ namespace felspar::coro {
         cancellable &operator=(cancellable const &) = delete;
         cancellable &operator=(cancellable &&) = delete;
 
+
+        /// ### `cancel`
         /// Used externally to cancel the controlled coroutine
         void cancel() {
             signalled = true;
@@ -34,10 +36,12 @@ namespace felspar::coro {
         }
         bool cancelled() const noexcept { return signalled; }
 
+
+        /// ### `signal_or`
         /// Wrap an awaitable so that an early resumption can be signalled
         template<typename A>
-        auto signal_or(A coro_awaitable) {
-            struct awaitable {
+        FELSPAR_CORO_WRAPPER auto signal_or(A coro_awaitable) {
+            struct FELSPAR_CORO_CRT awaitable {
                 A a;
                 cancellable &b;
                 coroutine_handle<> continuation = {};
@@ -48,7 +52,7 @@ namespace felspar::coro {
                     return b.signalled or a.await_ready();
                 }
                 auto await_suspend(coroutine_handle<> h) noexcept {
-                    /// `h` is the coroutine making use of the `cancellable`
+                    // `h` is the coroutine making use of the `cancellable`
                     continuation = h;
                     b.continuations.push_back(h);
                     return a.await_suspend(h);
@@ -67,9 +71,10 @@ namespace felspar::coro {
             return awaitable{std::move(coro_awaitable), *this};
         }
 
-        /// This can be directly awaited until signalled
-        auto operator co_await() {
-            struct awaitable {
+        /// ### `operator co_await`
+        /// This type can also be directly awaited until signalled
+        FELSPAR_CORO_WRAPPER auto operator co_await() {
+            struct FELSPAR_CORO_CRT awaitable {
                 cancellable &b;
                 coroutine_handle<> continuation = {};
 

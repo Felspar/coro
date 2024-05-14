@@ -13,21 +13,6 @@ namespace felspar::coro {
     using suspend_always = std::suspend_always;
     using suspend_never = std::suspend_never;
 }
-/**
-Super bad idea, but the sort of thing that would be needed to make
-clang work with libstdc++ as clang seems to be hard coded to look
-in the experimental namespace for things.
-```cpp
-namespace std::experimental {
-    template<typename T = void>
-    using coroutine_handle = std::coroutine_handle<T>;
-    template<typename... Ts>
-    using coroutine_traits = std::coroutine_traits<Ts...>;
-    using suspend_always = std::suspend_always;
-    using suspend_never = std::suspend_never;
-}
-```
-*/
 #else
 #include <experimental/coroutine>
 namespace felspar::coro {
@@ -37,6 +22,23 @@ namespace felspar::coro {
     using suspend_always = std::experimental::suspend_always;
     using suspend_never = std::experimental::suspend_never;
 }
+#endif
+
+
+#if defined __has_attribute
+#if not defined FELSPAR_CORO_SKIP_LIFETIME_CHECKS \
+        and __has_attribute(coro_return_type) \
+        and __has_attribute(coro_lifetimebound) \
+        and __has_attribute(coro_wrapper)
+#define FELSPAR_CORO_CRT [[clang::coro_return_type, clang::coro_lifetimebound]]
+#define FELSPAR_CORO_WRAPPER [[clang::coro_wrapper]]
+#endif
+#endif
+#if not defined FELSPAR_CORO_CRT
+#define FELSPAR_CORO_CRT
+#endif
+#if not defined FELSPAR_CORO_WRAPPER
+#define FELSPAR_CORO_WRAPPER
 #endif
 
 

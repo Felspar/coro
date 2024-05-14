@@ -61,8 +61,8 @@ namespace felspar::coro {
 
 
         /// ### Coroutine interface
-        auto operator co_await() {
-            struct awaitable {
+        FELSPAR_CORO_WRAPPER auto operator co_await() {
+            struct FELSPAR_CORO_CRT awaitable {
                 explicit awaitable(coro::future<value_type> &f) : fut{f} {}
                 awaitable(awaitable const &) = delete;
                 // TODO We could be movable
@@ -137,8 +137,8 @@ namespace felspar::coro {
 
 
         /// ### Coroutine interface
-        auto operator co_await() {
-            struct awaitable {
+        FELSPAR_CORO_WRAPPER auto operator co_await() {
+            struct FELSPAR_CORO_CRT awaitable {
                 explicit awaitable(coro::future<void> &f) : fut{f} {}
                 awaitable(awaitable const &) = delete;
                 // TODO We could be movable

@@ -130,3 +130,12 @@ An asynchronous future that can be set and read from non-coroutines, but also aw
 ## Debugging
 
 * There's a useful clang document about [debugging coroutines with gdb](https://clang.llvm.org/docs/DebuggingCoroutines.html).
+
+
+## Clang lifetime tracking
+
+By default clang's coroutine lifetime tracking attributes are enabled, but due to the virality of the [`[[clang:coro_wrapper]]`](https://clang.llvm.org/docs/AttributeReference.html#coro-wrapper) attribute they can cause problems when you use higher order functions that manipulate coroutine return types (like `task`, `stream` etc.). To turn the attributes off define `FELSPAR_CORO_SKIP_LIFETIME_CHECKS` in your build. If you're using `add_subdirectory` to bring in the library then adding this afterwards will do it:
+
+```cmake
+target_compile_definitions(felspar-coro INTERFACE FELSPAR_CORO_SKIP_LIFETIME_CHECKS)
+```
