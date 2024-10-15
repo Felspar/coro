@@ -1,4 +1,4 @@
-#include <felspar/coro/start.hpp>
+#include <felspar/coro/starter.hpp>
 #include <felspar/exceptions.hpp>
 #include <felspar/test.hpp>
 
