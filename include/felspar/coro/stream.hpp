@@ -87,6 +87,7 @@ namespace felspar::coro {
 
       public:
         stream_awaitable(H &c) : continuation{c} {}
+        ~stream_awaitable() { continuation.promise().continuation = {}; }
 
         bool await_ready() const noexcept {
             return continuation.promise().completed;

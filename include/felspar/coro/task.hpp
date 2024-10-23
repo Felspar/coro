@@ -126,6 +126,7 @@ namespace felspar::coro {
              */
             struct FELSPAR_CORO_CRT awaitable {
                 handle_type coro;
+                ~awaitable() { coro.promise().continuation = {}; }
 
                 bool await_ready() const noexcept {
                     return coro.promise().has_value();
