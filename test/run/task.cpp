@@ -1,6 +1,8 @@
 #include <felspar/coro/task.hpp>
 #include <felspar/test.hpp>
 
+#include <memory>
+
 
 namespace {
 
@@ -14,18 +16,15 @@ namespace {
 
     auto const mv = suite.test("movable value", [](auto check) {
         struct X {
-            // Uncomment for ICE in gcc-10
-            // std::string member;
-            X() {}
-            X(X const &) = delete;
-            X(X &&) = default;
-            X &operator=(X const &) = delete;
-            X &operator=(X &&) = default;
-            ~X() = default;
-            bool operator==(X const &) const { return true; }
+            std::unique_ptr<std::string> member;
+            X(std::string s)
+            : member{std::make_unique<std::string>(std::move(s))} {}
+            bool operator==(X const &o) const { return *member == *o.member; }
         };
-        auto marks_the_spot = []() -> felspar::coro::task<X> { co_return X{}; };
-        check(marks_the_spot().get()) == X{};
+        auto marks_the_spot = []() -> felspar::coro::task<X> {
+            co_return X{"spot"};
+        };
+        check(marks_the_spot().get()) == X{"spot"};
     });
 
     auto const iw = suite.test("ignored awaitable", [](auto check) {
