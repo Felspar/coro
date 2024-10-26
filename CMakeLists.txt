@@ -8,6 +8,10 @@ if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
     set_property(TARGET felspar-check PROPERTY EXCLUDE_FROM_ALL TRUE)
     add_custom_target(felspar-examples)
     include(requirements.cmake)
+    add_compile_options(
+            -fdiagnostics-color=always
+            -fdiagnostics-show-option
+        )
 endif()
 
 
