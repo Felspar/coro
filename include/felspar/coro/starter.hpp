@@ -4,6 +4,8 @@
 #include <felspar/coro/task.hpp>
 #include <felspar/exceptions.hpp>
 
+// TODO Can we get rid of the algorithm header? It's really big
+#include <algorithm>
 #include <vector>
 
 
@@ -17,6 +19,7 @@ namespace felspar::coro {
         using task_type = Task;
         using promise_type = typename task_type::promise_type;
         using handle_type = typename promise_type::handle_type;
+
 
         /// ### Start a new coroutine
         template<typename... PArgs, typename... MArgs>
@@ -34,9 +37,11 @@ namespace felspar::coro {
             live.push_back(t.release());
         }
 
+
         /// ### The number of coroutines currently held by the starter
         [[nodiscard]] std::size_t size() const noexcept { return live.size(); }
         [[nodiscard]] bool empty() const noexcept { return live.empty(); }
+
 
         /// ### Garbage collect old coroutines
         /// Ignores any errors and return values.
@@ -65,6 +70,7 @@ namespace felspar::coro {
                     live.end());
         }
 
+
         /// ### Wait for all coroutines to complete
         /**
          * Or for the first to throw an exception. If no exception has happened
@@ -81,6 +87,7 @@ namespace felspar::coro {
             co_return count;
         }
 
+
         /// ### The next item in line in the starter
         FELSPAR_CORO_WRAPPER task_type
                 next(source_location const &loc = source_location::current()) {
@@ -94,6 +101,7 @@ namespace felspar::coro {
                 return t;
             }
         }
+
 
         /// ### Delete all coroutines
         /**
