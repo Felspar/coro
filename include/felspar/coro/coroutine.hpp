@@ -64,7 +64,7 @@ namespace felspar::coro {
         unique_handle(unique_handle const &) = delete;
         unique_handle(unique_handle &&h) noexcept
         : handle{std::exchange(h.handle, {})} {}
-        ~unique_handle() {
+        ~unique_handle() override {
             if (handle) { handle.destroy(); }
         }
 
@@ -91,7 +91,7 @@ namespace felspar::coro {
 
         /// Forwarders for `coroutine_handle<P>` members
         explicit operator bool() const noexcept { return bool{handle}; }
-        bool done() const noexcept { return handle.done(); }
+        bool done() const noexcept override { return handle.done(); }
         template<typename PP>
         static auto from_promise(PP &&pp) noexcept {
             return unique_handle{
