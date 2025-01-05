@@ -18,7 +18,7 @@ namespace felspar::coro {
       public:
         using task_type = Task;
         using promise_type = typename task_type::promise_type;
-        using handle_type = typename promise_type::handle_type;
+        using unique_handle_type = typename promise_type::unique_handle_type;
 
 
         /// ### Start a new coroutine
@@ -111,7 +111,7 @@ namespace felspar::coro {
         void reset() { live.clear(); }
 
       private:
-        std::vector<handle_type> live;
+        std::vector<unique_handle_type> live;
     };
 
 

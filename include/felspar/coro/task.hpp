@@ -40,7 +40,7 @@ namespace felspar::coro {
     public task_promise_base<Allocator> {
         using value_type = void;
         using allocator_type = Allocator;
-        using handle_type = unique_handle<task_promise>;
+        using unique_handle_type = unique_handle<task_promise>;
 
         using task_promise_base<allocator_type>::eptr;
         using task_promise_base<allocator_type>::check_exception;
@@ -62,7 +62,7 @@ namespace felspar::coro {
     struct task_promise final : public task_promise_base<Allocator> {
         using value_type = Y;
         using allocator_type = Allocator;
-        using handle_type = unique_handle<task_promise>;
+        using unique_handle_type = unique_handle<task_promise>;
 
         using task_promise_base<allocator_type>::eptr;
         using task_promise_base<allocator_type>::check_exception;
@@ -98,13 +98,13 @@ namespace felspar::coro {
         using value_type = Y;
         using allocator_type = Allocator;
         using promise_type = task_promise<value_type, allocator_type>;
-        using handle_type = typename promise_type::handle_type;
+        using unique_handle_type = typename promise_type::unique_handle_type;
 
 
         /// ### Construction
 
         /// #### Construct a new task from a previously released one
-        explicit task(handle_type h) : coro{std::move(h)} {}
+        explicit task(unique_handle_type h) : coro{std::move(h)} {}
 
 
         /// #### Not copyable
@@ -125,7 +125,7 @@ namespace felspar::coro {
              * is long enough to deliver the return value.
              */
             struct FELSPAR_CORO_CRT awaitable {
-                handle_type coro;
+                unique_handle_type coro;
                 ~awaitable() { coro.promise().continuation = {}; }
 
                 bool await_ready() const noexcept {
@@ -148,7 +148,7 @@ namespace felspar::coro {
                     return coro.promise().consume_value();
                 }
             };
-            return awaitable{std::move(coro)};
+            return awaitable{.coro = std::move(coro)};
         }
 
 
@@ -162,14 +162,18 @@ namespace felspar::coro {
 
 
         /// ### Or take on responsibility for the coroutine
-        handle_type release() {
-            auto c = std::move(coro);
+        unique_handle_type release() {
+            unique_handle_type c{std::move(coro)};
+            if (coro) {
+                throw felspar::stdexcept::logic_error{
+                        "This moved from handle still has a coro"};
+            }
             return c;
         }
 
 
       private:
-        handle_type coro;
+        unique_handle_type coro;
 
         void start(source_location const &loc = source_location::current()) {
             if (not coro) {
@@ -186,13 +190,14 @@ namespace felspar::coro {
     template<typename Allocator>
     inline auto task_promise<void, Allocator>::get_return_object()
             -> task<void, allocator_type> {
-        return task<void, allocator_type>{handle_type::from_promise(*this)};
+        return task<void, allocator_type>{
+                unique_handle_type::from_promise(*this)};
     }
     template<typename T, typename Allocator>
     inline auto task_promise<T, Allocator>::get_return_object()
             -> task<value_type, allocator_type> {
         return task<value_type, allocator_type>{
-                handle_type::from_promise(*this)};
+                unique_handle_type::from_promise(*this)};
     }
 
 
