@@ -75,15 +75,6 @@ namespace felspar::coro {
             return *this;
         }
 
-        /// Comparison
-        template<typename T>
-        bool operator==(unique_handle<T> c) const {
-            return get() == c.get();
-        }
-        template<typename T>
-        bool operator==(coroutine_handle<T> c) const {
-            return get() == c;
-        }
 
         /// Allow access to the underlying handle
         auto get() const noexcept { return handle; }
