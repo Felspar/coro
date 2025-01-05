@@ -162,14 +162,7 @@ namespace felspar::coro {
 
 
         /// ### Or take on responsibility for the coroutine
-        unique_handle_type release() {
-            unique_handle_type c{std::move(coro)};
-            if (coro) {
-                throw felspar::stdexcept::logic_error{
-                        "This moved from handle still has a coro"};
-            }
-            return c;
-        }
+        unique_handle_type release() { return {std::move(coro)}; }
 
 
       private:
