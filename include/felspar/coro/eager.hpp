@@ -13,7 +13,7 @@ namespace felspar::coro {
       public:
         using task_type = Task;
         using promise_type = typename task_type::promise_type;
-        using handle_type = typename promise_type::handle_type;
+        using unique_handle_type = typename promise_type::unique_handle_type;
 
 
         /// ### Start a task immediately
@@ -52,7 +52,7 @@ namespace felspar::coro {
 
 
       private:
-        handle_type coro;
+        unique_handle_type coro;
     };
 
 
