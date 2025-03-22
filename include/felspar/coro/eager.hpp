@@ -37,6 +37,9 @@ namespace felspar::coro {
 
         /// ### Lifetime
 
+        /// #### Return true if there is no task
+        bool empty() const noexcept { return not coro; }
+
         /// #### Return true if the task is already done
         bool done() const noexcept { return coro and coro.done(); }
 
