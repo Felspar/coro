@@ -2,6 +2,10 @@
 
 **C++ coroutine library and toolkit**
 
+[![Documentation](https://badgen.net/static/docs/felspar.com)](https://felspar.com/coro/)
+[![GitHub](https://badgen.net/badge/Github/felspar-coro/green?icon=github)](https://github.com/Felspar/coro)
+[![License](https://badgen.net/github/license/Felspar/coro)](https://github.com/Felspar/coro/blob/main/LICENSE_1_0.txt)
+[![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/tKSabUa52v)
 
 **felspar-coro** is a C++20 library to help you to use coroutines in your own libraries and applications. You should be able to use it with a recent clang or gcc compiler on Unix systems (e.g. Linux and Mac).
 
@@ -116,3 +120,22 @@ Starts and takes over ownership of new coroutines. `starter` can control many co
 ### `felspar::coro::bus`
 
 A data bus that allows one or more coroutines to wait for a value to be produced.
+
+
+### `felspar::coro::future`
+
+An asynchronous future that can be set and read from non-coroutines, but also awaited.
+
+
+## Debugging
+
+* There's a useful clang document about [debugging coroutines with gdb](https://clang.llvm.org/docs/DebuggingCoroutines.html).
+
+
+## Clang lifetime tracking
+
+By default clang's coroutine lifetime tracking attributes are enabled, but due to the virality of the [`[[clang:coro_wrapper]]`](https://clang.llvm.org/docs/AttributeReference.html#coro-wrapper) attribute they can cause problems when you use higher order functions that manipulate coroutine return types (like `task`, `stream` etc.). To turn the attributes off define `FELSPAR_CORO_SKIP_LIFETIME_CHECKS` in your build. If you're using `add_subdirectory` to bring in the library then adding this afterwards will do it:
+
+```cmake
+target_compile_definitions(felspar-coro INTERFACE FELSPAR_CORO_SKIP_LIFETIME_CHECKS)
+```

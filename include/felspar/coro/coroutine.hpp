@@ -5,31 +5,39 @@
 #include <utility>
 
 
+#if defined __has_attribute
+#if not defined FELSPAR_CORO_SKIP_LIFETIME_CHECKS \
+        and __has_attribute(coro_return_type) \
+        and __has_attribute(coro_lifetimebound) \
+        and __has_attribute(coro_wrapper)
+#define FELSPAR_CORO_CRT [[clang::coro_return_type, clang::coro_lifetimebound]]
+#define FELSPAR_CORO_WRAPPER [[clang::coro_wrapper]]
+#endif
+#endif
+#if not defined FELSPAR_CORO_CRT
+#define FELSPAR_CORO_CRT
+#endif
+#if not defined FELSPAR_CORO_WRAPPER
+#define FELSPAR_CORO_WRAPPER
+#endif
+
+
 namespace felspar::coro {
 
 
-    template<typename T = void>
-    using coroutine_handle = std::coroutine_handle<T>;
-    using std::noop_coroutine;
-    using suspend_always = std::suspend_always;
-    using suspend_never = std::suspend_never;
-
-
-    /// A type erased base type for the `unique_handle`
-    struct unique_handle_base {
-        virtual ~unique_handle_base() = default;
-        virtual bool done() const noexcept = 0;
-    };
-
-
-    /// A wrapper around `std::coroutine_handle<P>` that manages the handle,
-    /// calling `destroy` on it when done.
+    /// ## Coroutine handles
+    /**
+     * A wrapper around `std::coroutine_handle<P>` that manages the handle,
+     * calling `destroy` on it when done.
+     */
     template<typename P = void>
-    class unique_handle final : public unique_handle_base {
+    class unique_handle final {
         std::coroutine_handle<P> handle = {};
         explicit unique_handle(std::coroutine_handle<P> h) : handle{h} {}
 
+
       public:
+        /// ### Construction and assignment
         unique_handle() {}
         unique_handle(unique_handle const &) = delete;
         unique_handle(unique_handle &&h) noexcept
@@ -45,7 +53,8 @@ namespace felspar::coro {
             return *this;
         }
 
-        /// Comparison
+
+        /// ### Comparison
         template<typename T>
         bool operator==(unique_handle<T> c) const {
             return get() == c.get();
@@ -55,11 +64,13 @@ namespace felspar::coro {
             return get() == c;
         }
 
-        /// Allow access to the underlying handle
+
+        /// ### Allow access to the underlying handle
         auto get() const noexcept { return handle; }
         auto release() noexcept { return std::exchange(handle, {}); }
 
-        /// Forwarders for `std::coroutine_handle<P>` members
+
+        /// ### Forwarders for `coroutine_handle<P>` members
         explicit operator bool() const noexcept { return bool{handle}; }
         bool done() const noexcept { return handle.done(); }
         template<typename PP>
@@ -73,8 +84,11 @@ namespace felspar::coro {
     };
 
 
-    /// Generally used from final_suspend when we need to execute a continuation
-    /// after the coroutine has completed
+    /// ## Symmetric continuation
+    /**
+     * Generally used from `final_suspend` when we need to execute a
+     * continuation after the coroutine has completed.
+     */
     struct symmetric_continuation {
         std::coroutine_handle<> continuation;
         bool await_ready() const noexcept { return false; }

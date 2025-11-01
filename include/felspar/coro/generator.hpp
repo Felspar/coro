@@ -5,6 +5,8 @@
 #include <felspar/coro/coroutine.hpp>
 #include <felspar/memory/holding_pen.hpp>
 
+#include <exception>
+
 
 namespace felspar::coro {
 
@@ -13,10 +15,13 @@ namespace felspar::coro {
     struct generator_promise;
 
 
-    /// A coroutine based generator. Values may be iterated (`begin`/`end`), or
-    /// values may be fetched (`next`), but not both.
+    /// ## Generator
+    /**
+     * A coroutine based generator. Values may be iterated (`begin`/`end`), or
+     * values may be fetched (`next`), but not both.
+     */
     template<typename Y, typename Allocator = void>
-    class generator final {
+    class FELSPAR_CORO_CRT generator final {
         friend struct generator_promise<Y, Allocator>;
         using handle_type =
                 typename generator_promise<Y, Allocator>::handle_type;
@@ -59,6 +64,7 @@ namespace felspar::coro {
             iterator &operator=(iterator &&i) = default;
             ~iterator() = default;
 
+
             Y operator*() {
                 return static_cast<Y &&>(
                         std::move(coro.promise().value).transfer_out().value());
@@ -70,6 +76,7 @@ namespace felspar::coro {
                 if (not coro.promise().value) { coro = {}; }
                 return *this;
             }
+
 
             friend bool operator==(iterator const &l, iterator const &r) {
                 if (not l.coro && not r.coro) {
@@ -85,6 +92,7 @@ namespace felspar::coro {
         };
         auto begin() { return iterator{this}; }
         auto end() { return iterator{}; }
+
 
         /// Fetching values. Returns an empty `optional` when completed.
         memory::holding_pen<Y> next() {
@@ -117,10 +125,7 @@ namespace felspar::coro {
         }
         void unhandled_exception() { eptr = std::current_exception(); }
 
-        auto return_void() {
-            value.reset();
-            return std::suspend_never{};
-        }
+        void return_void() { value.reset(); }
 
         auto get_return_object() {
             return generator<Y, Allocator>{handle_type::from_promise(*this)};

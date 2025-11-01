@@ -1,4 +1,4 @@
-#include <felspar/coro/start.hpp>
+#include <felspar/coro/starter.hpp>
 #include <felspar/exceptions.hpp>
 #include <felspar/test.hpp>
 
@@ -38,9 +38,9 @@ namespace {
                 felspar::coro::starter<> s;
                 s.post(co_throw, felspar::source_location::current());
                 check(s.size()) == 1u;
-                check([&]() { s.wait_for_all().get(); })
-                        .throws(felspar::stdexcept::runtime_error{
-                                "A test exception"});
+                check([&]() {
+                    s.wait_for_all().get();
+                }).throws(felspar::stdexcept::runtime_error{"A test exception"});
                 check(s.size()) == 0u;
             },
             [](auto check) {
@@ -57,9 +57,9 @@ namespace {
                 s.post(co_false);
                 check(s.size()) == 3u;
                 check(s.next().get()) == false;
-                check([&]() { s.next().get(); })
-                        .throws(felspar::stdexcept::runtime_error{
-                                "A test exception"});
+                check([&]() {
+                    s.next().get();
+                }).throws(felspar::stdexcept::runtime_error{"A test exception"});
                 check(s.next().get()) == true;
                 check(s.size()) == 0u;
             });

@@ -2,6 +2,7 @@
 
 
 #include <felspar/coro/coroutine.hpp>
+#include <felspar/coro/stream.hpp>
 #include <felspar/coro/task.hpp>
 
 #include <optional>
@@ -20,6 +21,9 @@ namespace felspar::coro {
      * The value type you used must be copyable. There is no thread
      * synchronisation, and waiting coroutines will be resumed in the same
      * thread that published the new value.
+     *
+     * **NB** The bus is an inherently lossy mechanism. Only coroutines
+     * currently waiting when a new value comes in will be notified.
      */
     template<typename T>
     class bus final {
@@ -27,7 +31,14 @@ namespace felspar::coro {
         std::vector<std::coroutine_handle<>> waiting, processing;
 
       public:
+        using value_type = T;
+
         bus() = default;
+        bus(bus &&) = default;
+        bus(bus const &) = delete;
+
+        bus &operator=(bus &&) = default;
+        bus &operator=(bus const &) = delete;
 
 
         /// ### Query the bus
@@ -47,8 +58,10 @@ namespace felspar::coro {
         /// ### Return an awaitable for the next value
         auto next() {
             struct awaitable {
-                bus &b;
-                coroutine_handle<> waiting_handle = {};
+                awaitable(bus &bb) : b{bb} {}
+                awaitable(awaitable const &) = delete;
+                // TODO We could be movable
+                awaitable(awaitable &&) = delete;
                 ~awaitable() {
                     if (waiting_handle) {
                         std::erase(b.waiting, waiting_handle);
@@ -56,17 +69,36 @@ namespace felspar::coro {
                     }
                 }
 
+                awaitable &operator=(awaitable const &) = delete;
+                awaitable &operator=(awaitable &&) = delete;
+
+
+                bus &b;
+                std::coroutine_handle<> waiting_handle = {};
+
+
                 bool await_ready() const noexcept { return false; }
                 void await_suspend(std::coroutine_handle<> h) {
                     waiting_handle = h;
                     b.waiting.push_back(h);
                 }
-                T const &await_resume() {
+                T &await_resume() {
                     waiting_handle = {};
                     return *b.current;
                 }
             };
             return awaitable{*this};
+        }
+
+
+        /// ### Return a stream of values coming from the bus
+        /**
+         * The stream will never terminate, but it is safe to delete so long as
+         * the deletion is not a result of a message sent to the stream. See the
+         * `push` member for more details
+         */
+        coro::stream<T> stream() {
+            while (true) { co_yield (co_await next()); }
         }
 
 

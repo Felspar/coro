@@ -5,6 +5,8 @@
 #include <felspar/coro/coroutine.hpp>
 #include <felspar/memory/holding_pen.hpp>
 
+#include <exception>
+
 
 namespace felspar::coro {
 
@@ -16,7 +18,7 @@ namespace felspar::coro {
 
 
     template<typename Y, typename Allocator = void>
-    class stream final {
+    class FELSPAR_CORO_CRT stream final {
         friend struct stream_promise<Y, Allocator>;
         using handle_type = typename stream_promise<Y, Allocator>::handle_type;
         handle_type yielding_coro;
@@ -36,7 +38,7 @@ namespace felspar::coro {
         stream &operator=(stream &&t) noexcept = default;
         ~stream() = default;
 
-        stream_awaitable<Y, handle_type> next();
+        FELSPAR_CORO_WRAPPER stream_awaitable<Y, handle_type> next();
     };
 
 
@@ -62,10 +64,9 @@ namespace felspar::coro {
             completed = true;
             value.reset();
         }
-        auto return_void() {
+        void return_void() {
             completed = true;
             value.reset();
-            return std::suspend_never{};
         }
 
         auto get_return_object() {
@@ -86,6 +87,7 @@ namespace felspar::coro {
 
       public:
         stream_awaitable(H &c) : continuation{c} {}
+        ~stream_awaitable() { continuation.promise().continuation = {}; }
 
         bool await_ready() const noexcept {
             return continuation.promise().completed;

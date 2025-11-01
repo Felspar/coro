@@ -3,6 +3,9 @@
 time (
         # User specified targets
         ninja -C ./build.tmp/clang-debug-libc++ $* &&
+        # stdlib=libc++ asan
+        ninja -C ./build.tmp/clang-debug-asan all felspar-check &&
+        ninja -C ./build.tmp/clang-release-asan all felspar-check &&
         # Debug builds
         ninja -C ./build.tmp/clang-debug-libc++ all felspar-check &&
         ninja -C ./build.tmp/gcc-debug all felspar-check &&
@@ -12,9 +15,6 @@ time (
         # libstdc++
         ninja -C ./build.tmp/clang-debug all felspar-check &&
         ninja -C ./build.tmp/clang-release all felspar-check &&
-        # stdlib=libc++ asan
-        ninja -C ./build.tmp/clang-debug-asan all felspar-check &&
-        ninja -C ./build.tmp/clang-release-asan all felspar-check &&
         # stdlib=libc++ asan force PMR
         ninja -C ./build.tmp/clang-debug-pmr-asan all felspar-check &&
         ninja -C ./build.tmp/clang-release-pmr-asan all felspar-check &&
