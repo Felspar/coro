@@ -15,8 +15,11 @@ namespace felspar::coro {
     struct generator_promise;
 
 
-    /// A coroutine based generator. Values may be iterated (`begin`/`end`), or
-    /// values may be fetched (`next`), but not both.
+    /// ## Generator
+    /**
+     * A coroutine based generator. Values may be iterated (`begin`/`end`), or
+     * values may be fetched (`next`), but not both.
+     */
     template<typename Y, typename Allocator = void>
     class FELSPAR_CORO_CRT generator final {
         friend struct generator_promise<Y, Allocator>;
@@ -114,11 +117,11 @@ namespace felspar::coro {
         using handle_type = unique_handle<generator_promise>;
 
         template<typename A>
-        suspend_always await_transform(A &&) = delete; // Use stream
+        std::suspend_always await_transform(A &&) = delete; // Use stream
 
         auto yield_value(Y y) {
             value.emplace(std::move(y));
-            return suspend_always{};
+            return std::suspend_always{};
         }
         void unhandled_exception() { eptr = std::current_exception(); }
 
@@ -127,8 +130,8 @@ namespace felspar::coro {
         auto get_return_object() {
             return generator<Y, Allocator>{handle_type::from_promise(*this)};
         }
-        auto initial_suspend() const noexcept { return suspend_always{}; }
-        auto final_suspend() const noexcept { return suspend_always{}; }
+        auto initial_suspend() const noexcept { return std::suspend_always{}; }
+        auto final_suspend() const noexcept { return std::suspend_always{}; }
     };
 
 

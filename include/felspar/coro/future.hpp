@@ -29,7 +29,7 @@ namespace felspar::coro {
     template<typename T>
     class future {
         std::optional<T> m_value;
-        std::vector<coroutine_handle<>> continuations;
+        std::vector<std::coroutine_handle<>> continuations;
 
 
       public:
@@ -76,11 +76,11 @@ namespace felspar::coro {
 
 
                 coro::future<value_type> &fut;
-                coroutine_handle<> mine = {};
+                std::coroutine_handle<> mine = {};
 
 
                 bool await_ready() const noexcept { return fut.has_value(); }
-                void await_suspend(coroutine_handle<> h) {
+                void await_suspend(std::coroutine_handle<> h) {
                     mine = h;
                     fut.continuations.push_back(h);
                 }
@@ -110,7 +110,7 @@ namespace felspar::coro {
     template<>
     class future<void> {
         bool m_has_value = false;
-        std::vector<coroutine_handle<>> continuations;
+        std::vector<std::coroutine_handle<>> continuations;
 
 
       public:
@@ -152,11 +152,11 @@ namespace felspar::coro {
 
 
                 coro::future<void> &fut;
-                coroutine_handle<> mine = {};
+                std::coroutine_handle<> mine = {};
 
 
                 bool await_ready() const noexcept { return fut.has_value(); }
-                void await_suspend(coroutine_handle<> h) {
+                void await_suspend(std::coroutine_handle<> h) {
                     mine = h;
                     fut.continuations.push_back(h);
                 }

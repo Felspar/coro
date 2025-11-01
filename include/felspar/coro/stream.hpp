@@ -47,7 +47,7 @@ namespace felspar::coro {
         using promise_allocator_impl<Allocator>::operator new;
         using promise_allocator_impl<Allocator>::operator delete;
 
-        coroutine_handle<> continuation = {};
+        std::coroutine_handle<> continuation = {};
         bool completed = false;
         memory::holding_pen<Y> value = {};
         std::exception_ptr eptr = {};
@@ -73,7 +73,7 @@ namespace felspar::coro {
             return stream<Y, Allocator>{handle_type::from_promise(*this)};
         }
 
-        auto initial_suspend() const noexcept { return suspend_always{}; }
+        auto initial_suspend() const noexcept { return std::suspend_always{}; }
         auto final_suspend() const noexcept {
             return symmetric_continuation{continuation};
         }
@@ -92,7 +92,7 @@ namespace felspar::coro {
         bool await_ready() const noexcept {
             return continuation.promise().completed;
         }
-        auto await_suspend(coroutine_handle<> awaiting) noexcept {
+        auto await_suspend(std::coroutine_handle<> awaiting) noexcept {
             continuation.promise().continuation = awaiting;
             return continuation.get();
         }

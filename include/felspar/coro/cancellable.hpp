@@ -11,10 +11,10 @@ namespace felspar::coro {
 
     /// ## Cancellable coroutines
     class cancellable {
-        std::vector<coroutine_handle<>> continuations = {};
+        std::vector<std::coroutine_handle<>> continuations = {};
         bool signalled = false;
 
-        void remove(coroutine_handle<> h) { std::erase(continuations, h); }
+        void remove(std::coroutine_handle<> h) { std::erase(continuations, h); }
 
       public:
         cancellable() {}
@@ -44,15 +44,15 @@ namespace felspar::coro {
             struct FELSPAR_CORO_CRT awaitable {
                 A a;
                 cancellable &b;
-                coroutine_handle<> continuation = {};
+                std::coroutine_handle<> continuation = {};
 
                 ~awaitable() { b.remove(continuation); }
 
                 bool await_ready() const noexcept {
                     return b.signalled or a.await_ready();
                 }
-                auto await_suspend(coroutine_handle<> h) noexcept {
-                    // `h` is the coroutine making use of the `cancellable`
+                auto await_suspend(std::coroutine_handle<> h) noexcept {
+                    /// `h` is the coroutine making use of the `cancellable`
                     continuation = h;
                     b.continuations.push_back(h);
                     return a.await_suspend(h);
@@ -76,12 +76,12 @@ namespace felspar::coro {
         FELSPAR_CORO_WRAPPER auto operator co_await() {
             struct FELSPAR_CORO_CRT awaitable {
                 cancellable &b;
-                coroutine_handle<> continuation = {};
+                std::coroutine_handle<> continuation = {};
 
                 ~awaitable() { b.remove(continuation); }
 
                 bool await_ready() const noexcept { return b.signalled; }
-                void await_suspend(coroutine_handle<> h) noexcept {
+                void await_suspend(std::coroutine_handle<> h) noexcept {
                     continuation = h;
                     b.continuations.push_back(h);
                 }

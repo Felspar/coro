@@ -28,7 +28,7 @@ namespace felspar::coro {
     template<typename T>
     class bus final {
         std::optional<T> current;
-        std::vector<coroutine_handle<>> waiting, processing;
+        std::vector<std::coroutine_handle<>> waiting, processing;
 
       public:
         using value_type = T;
@@ -74,11 +74,11 @@ namespace felspar::coro {
 
 
                 bus &b;
-                coroutine_handle<> waiting_handle = {};
+                std::coroutine_handle<> waiting_handle = {};
 
 
                 bool await_ready() const noexcept { return false; }
-                void await_suspend(felspar::coro::coroutine_handle<> h) {
+                void await_suspend(std::coroutine_handle<> h) {
                     waiting_handle = h;
                     b.waiting.push_back(h);
                 }

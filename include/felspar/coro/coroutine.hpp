@@ -1,28 +1,8 @@
 #pragma once
 
 
-#include <utility>
-
-
-#if __has_include(<coroutine>)
 #include <coroutine>
-namespace felspar::coro {
-    template<typename T = void>
-    using coroutine_handle = std::coroutine_handle<T>;
-    using std::noop_coroutine;
-    using suspend_always = std::suspend_always;
-    using suspend_never = std::suspend_never;
-}
-#else
-#include <experimental/coroutine>
-namespace felspar::coro {
-    template<typename T = void>
-    using coroutine_handle = std::experimental::coroutine_handle<T>;
-    using std::experimental::noop_coroutine;
-    using suspend_always = std::experimental::suspend_always;
-    using suspend_never = std::experimental::suspend_never;
-}
-#endif
+#include <utility>
 
 
 #if defined __has_attribute
@@ -45,14 +25,15 @@ namespace felspar::coro {
 namespace felspar::coro {
 
 
+    /// ## Coroutine handles
     /**
-     * A wrapper around `coroutine_handle<P>` that manages the handle, calling
-     * `destroy` on it when done.
+     * A wrapper around `std::coroutine_handle<P>` that manages the handle,
+     * calling `destroy` on it when done.
      */
     template<typename P = void>
     class unique_handle final {
-        coroutine_handle<P> handle = {};
-        explicit unique_handle(coroutine_handle<P> h) : handle{h} {}
+        std::coroutine_handle<P> handle = {};
+        explicit unique_handle(std::coroutine_handle<P> h) : handle{h} {}
 
 
       public:
@@ -73,6 +54,17 @@ namespace felspar::coro {
         }
 
 
+        /// ### Comparison
+        template<typename T>
+        bool operator==(unique_handle<T> c) const {
+            return get() == c.get();
+        }
+        template<typename T>
+        bool operator==(std::coroutine_handle<T> c) const {
+            return get() == c;
+        }
+
+
         /// ### Allow access to the underlying handle
         auto get() const noexcept { return handle; }
         auto release() noexcept { return std::exchange(handle, {}); }
@@ -83,8 +75,8 @@ namespace felspar::coro {
         bool done() const noexcept { return handle.done(); }
         template<typename PP>
         static auto from_promise(PP &&pp) noexcept {
-            return unique_handle{
-                    coroutine_handle<P>::from_promise(std::forward<PP>(pp))};
+            return unique_handle{std::coroutine_handle<P>::from_promise(
+                    std::forward<PP>(pp))};
         }
         decltype(auto) promise() noexcept { return handle.promise(); }
         decltype(auto) promise() const noexcept { return handle.promise(); }
@@ -98,13 +90,14 @@ namespace felspar::coro {
      * continuation after the coroutine has completed.
      */
     struct symmetric_continuation {
-        coroutine_handle<> continuation;
+        std::coroutine_handle<> continuation;
         bool await_ready() const noexcept { return false; }
-        coroutine_handle<> await_suspend(coroutine_handle<>) const noexcept {
+        std::coroutine_handle<>
+                await_suspend(std::coroutine_handle<>) const noexcept {
             if (continuation) {
                 return continuation;
             } else {
-                return noop_coroutine();
+                return std::noop_coroutine();
             }
         }
         void await_resume() const noexcept {}

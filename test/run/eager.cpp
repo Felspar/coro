@@ -59,7 +59,7 @@ namespace {
     felspar::coro::task<void> never_ends() {
         struct no_end {
             bool await_ready() const noexcept { return false; }
-            void await_suspend(felspar::coro::coroutine_handle<>) noexcept {}
+            void await_suspend(std::coroutine_handle<>) noexcept {}
             void await_resume() {}
         };
         co_await no_end{};
