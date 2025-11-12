@@ -3,7 +3,6 @@
 
 #include <felspar/coro/coroutine.hpp>
 #include <felspar/exceptions.hpp>
-#include <felspar/test/source.hpp>
 
 #include <optional>
 #include <vector>
@@ -41,7 +40,8 @@ namespace felspar::coro {
         explicit operator bool() const noexcept { return has_value(); }
 
         value_type &
-                value(source_location const &loc = source_location::current()) {
+                value(std::source_location const &loc =
+                              std::source_location::current()) {
             if (not m_value) {
                 throw felspar::stdexcept::logic_error{
                         "Future does not contain a value", loc};
@@ -49,8 +49,9 @@ namespace felspar::coro {
                 return *m_value;
             }
         }
-        value_type const &value(
-                source_location const &loc = source_location::current()) const {
+        value_type const &
+                value(std::source_location const &loc =
+                              std::source_location::current()) const {
             if (not m_value) {
                 throw felspar::stdexcept::logic_error{
                         "Future does not contain a value", loc};
@@ -96,7 +97,8 @@ namespace felspar::coro {
         /// ### Set the future's value
         void set_value(
                 value_type t,
-                source_location const &loc = source_location::current()) {
+                std::source_location const &loc =
+                        std::source_location::current()) {
             if (m_value) {
                 throw stdexcept::logic_error{
                         "The future already has a value set", loc};
@@ -121,14 +123,17 @@ namespace felspar::coro {
         bool has_value() const noexcept { return m_has_value; }
         explicit operator bool() const noexcept { return has_value(); }
 
-        void value(source_location const &loc = source_location::current()) {
+        void
+                value(std::source_location const &loc =
+                              std::source_location::current()) {
             if (not m_has_value) {
                 throw felspar::stdexcept::logic_error{
                         "Future does not contain a value", loc};
             }
         }
-        void value(
-                source_location const &loc = source_location::current()) const {
+        void
+                value(std::source_location const &loc =
+                              std::source_location::current()) const {
             if (not m_has_value) {
                 throw felspar::stdexcept::logic_error{
                         "Future does not contain a value", loc};
@@ -167,7 +172,9 @@ namespace felspar::coro {
 
 
         /// ### Set the future's value
-        void set_value(source_location const &loc = source_location::current()) {
+        void set_value(
+                std::source_location const &loc =
+                        std::source_location::current()) {
             if (m_has_value) {
                 throw stdexcept::logic_error{
                         "The future already has a value set", loc};

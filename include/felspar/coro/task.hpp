@@ -154,8 +154,9 @@ namespace felspar::coro {
 
         /// ### Or use this from a normal function
         value_type get() & = delete;
-        value_type get(
-                source_location const &loc = source_location::current()) && {
+        value_type
+                get(std::source_location const &loc =
+                            std::source_location::current()) && {
             start(loc);
             return coro.promise().consume_value();
         }
@@ -168,7 +169,9 @@ namespace felspar::coro {
       private:
         unique_handle_type coro;
 
-        void start(source_location const &loc = source_location::current()) {
+        void
+                start(std::source_location const &loc =
+                              std::source_location::current()) {
             if (not coro) {
                 throw stdexcept::runtime_error{
                         "Cannot start an empty task", loc};

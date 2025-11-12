@@ -6,13 +6,13 @@
 namespace {
 
 
-    felspar::coro::task<void> co_throw(felspar::source_location loc) {
+    felspar::coro::task<void> co_throw(std::source_location loc) {
         throw felspar::stdexcept::runtime_error{"A test exception", loc};
         co_return;
     }
     felspar::coro::task<bool> co_true() { co_return true; }
     felspar::coro::task<bool> co_false() { co_return false; }
-    felspar::coro::task<bool> co_throw_bool(felspar::source_location loc) {
+    felspar::coro::task<bool> co_throw_bool(std::source_location loc) {
         throw felspar::stdexcept::runtime_error{"A test exception", loc};
         co_return true;
     }
@@ -22,7 +22,7 @@ namespace {
             "starter",
             [](auto check) {
                 felspar::coro::starter<> s;
-                s.post(co_throw, felspar::source_location::current());
+                s.post(co_throw, std::source_location::current());
                 check(s.size()) == 1u;
                 s.garbage_collect_completed();
                 check(s.size()) == 0u;
@@ -36,7 +36,7 @@ namespace {
             },
             [](auto check) {
                 felspar::coro::starter<> s;
-                s.post(co_throw, felspar::source_location::current());
+                s.post(co_throw, std::source_location::current());
                 check(s.size()) == 1u;
                 check([&]() {
                     s.wait_for_all().get();
@@ -53,7 +53,7 @@ namespace {
             [](auto check) {
                 felspar::coro::starter<felspar::coro::task<bool>> s;
                 s.post(co_true);
-                s.post(co_throw_bool, felspar::source_location::current());
+                s.post(co_throw_bool, std::source_location::current());
                 s.post(co_false);
                 check(s.size()) == 3u;
                 check(s.next().get()) == false;

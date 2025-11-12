@@ -90,7 +90,8 @@ namespace felspar::coro {
 
         /// ### The next item in line in the starter
         FELSPAR_CORO_WRAPPER task_type
-                next(source_location const &loc = source_location::current()) {
+                next(std::source_location const &loc =
+                             std::source_location::current()) {
             if (live.empty()) {
                 throw stdexcept::logic_error{
                         "Cannot call starter::next() if there are no items",
