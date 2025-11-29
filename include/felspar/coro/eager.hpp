@@ -16,9 +16,14 @@ namespace felspar::coro {
         using unique_handle_type = typename promise_type::unique_handle_type;
 
 
-        /// ### Start a task immediately
+        /// ### Construction
+        /// #### Start a task later on
         eager() {}
+        /// #### Start a task immediately
         explicit eager(task_type t) { post(std::move(t)); }
+
+
+        /// ### Start or replace the task
         template<typename... PArgs, typename... MArgs>
         void post(task_type (*f)(PArgs...), MArgs &&...margs) {
             static_assert(sizeof...(PArgs) == sizeof...(MArgs));
