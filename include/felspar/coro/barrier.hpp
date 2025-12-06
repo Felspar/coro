@@ -15,7 +15,7 @@ namespace felspar::coro {
      */
     template<typename Value, typename Task>
     class barrier final {
-        Value value;
+        std::optional<Value> value;
         std::vector<std::coroutine_handle<>> current{}, proc{};
 
 
@@ -26,7 +26,9 @@ namespace felspar::coro {
 
         /// ### Queries
         std::size_t size() const noexcept { return current.size(); }
-        Value const &last_value() const noexcept { return value; }
+        std::optional<Value> const &last_value() const noexcept {
+            return value;
+        }
 
 
         /// ### Awaiting
@@ -52,9 +54,7 @@ namespace felspar::coro {
                 mine = h;
                 owner.current.push_back(h);
             }
-            Value const &await_resume() const noexcept {
-                return owner.value;
-            }
+            Value const &await_resume() const noexcept { return *owner.value; }
         };
         awaitable operator co_await() { return {*this}; };
 
