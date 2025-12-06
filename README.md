@@ -119,7 +119,7 @@ Starts and takes over ownership of new coroutines. `starter` can control many co
 
 ### `felspar::coro::barrier`
 
-A barrier that can hold multiple coroutines and then release them at the same time.
+A barrier that can hold multiple coroutines and then release them at the same time. When signalled, a value can be passed through to the coroutines.
 
 
 ### `felspar::coro::bus`
