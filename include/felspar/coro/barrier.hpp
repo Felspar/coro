@@ -13,7 +13,7 @@ namespace felspar::coro {
      * The barrier allows for a number of coroutines to be held and then all
      * released at the same time.
      */
-    template<typename Value, typename Task>
+    template<typename Value>
     class barrier final {
         std::optional<Value> value;
         std::vector<std::coroutine_handle<>> current{}, proc{};
@@ -68,8 +68,8 @@ namespace felspar::coro {
         }
     };
 
-    template<typename Task>
-    class barrier<void, Task> final {
+    template<>
+    class barrier<void> final {
         std::vector<std::coroutine_handle<>> current{}, proc{};
 
 

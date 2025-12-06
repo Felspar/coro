@@ -4,11 +4,7 @@
 namespace felspar::coro {
 
 
-    template<typename Y, typename Allocator = void>
-    class task;
-
-
-    template<typename Restart, typename Task = task<Restart>>
+    template<typename Y>
     class barrier;
 
     template<typename Task>
@@ -16,6 +12,9 @@ namespace felspar::coro {
 
     template<typename Task>
     class starter;
+
+    template<typename Y, typename Allocator = void>
+    class task;
 
     template<typename Y, typename Allocator>
     struct task_promise;
