@@ -117,6 +117,11 @@ A basic lazily evaluated coroutine. Superficially very similar to a nullary lamb
 Starts and takes over ownership of new coroutines. `starter` can control many coroutines at once, and `eager` only one. They both allow new coroutines to be started in parallel. Posting of new coroutines into these structures does not need to happen from a coroutine.
 
 
+### `felspar::coro::barrier`
+
+A barrier that can hold multiple coroutines and then release them at the same time.
+
+
 ### `felspar::coro::bus`
 
 A data bus that allows one or more coroutines to wait for a value to be produced.
