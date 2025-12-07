@@ -12,6 +12,10 @@ namespace felspar::coro {
     /**
      * The barrier allows for a number of coroutines to be held and then all
      * released at the same time.
+     *
+     * The barrier can be `co_await`ed directly, and the `signal` method is used
+     * to resume all of the held coroutines. `size` can be called to find out
+     * how many coroutines are currently held.
      */
     template<typename Value>
     class barrier final {
