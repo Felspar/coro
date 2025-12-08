@@ -4,6 +4,9 @@
 namespace felspar::coro {
 
 
+    template<typename Y>
+    class barrier;
+
     template<typename Task>
     class eager;
 
