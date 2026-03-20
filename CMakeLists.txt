@@ -26,12 +26,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(coro_opt "$<$<COMPILE_LANGUAGE:CXX>:-fcoroutines;-Wno-mismatched-new-delete>")
 endif()
 
-add_library(felspar-coro INTERFACE)
-target_include_directories(felspar-coro INTERFACE include)
-target_compile_features(felspar-coro INTERFACE cxx_std_20)
-target_compile_options(felspar-coro INTERFACE ${coro_opt})
-target_link_libraries(felspar-coro INTERFACE felspar-memory)
-install(DIRECTORY include/felspar TYPE INCLUDE)
+add_subdirectory(src)
 
 if(TARGET felspar-examples)
     add_subdirectory(examples)

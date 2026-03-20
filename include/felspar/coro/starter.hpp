@@ -1,8 +1,8 @@
 #pragma once
 
 
+#include <felspar/coro/exception.details.hpp>
 #include <felspar/coro/task.hpp>
-#include <felspar/exceptions/logic_error.hpp>
 
 // TODO Can we get rid of the algorithm header? It's really big
 #include <algorithm>
@@ -93,9 +93,7 @@ namespace felspar::coro {
                 next(std::source_location const &loc =
                              std::source_location::current()) {
             if (live.empty()) {
-                throw stdexcept::logic_error{
-                        "Cannot call starter::next() if there are no items",
-                        loc};
+                detail::throw_starter_no_items(loc);
             } else {
                 task_type t{std::move(live.back())};
                 live.pop_back();
