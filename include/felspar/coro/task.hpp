@@ -4,7 +4,7 @@
 #include <felspar/coro/allocator.hpp>
 #include <felspar/coro/coroutine.hpp>
 #include <felspar/coro/forward.hpp>
-#include <felspar/exceptions.hpp>
+#include <felspar/exceptions/runtime_error.hpp>
 
 #include <exception>
 #include <optional>

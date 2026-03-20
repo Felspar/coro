@@ -2,7 +2,7 @@
 
 
 #include <felspar/coro/task.hpp>
-#include <felspar/exceptions.hpp>
+#include <felspar/exceptions/logic_error.hpp>
 
 // TODO Can we get rid of the algorithm header? It's really big
 #include <algorithm>

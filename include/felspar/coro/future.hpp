@@ -2,7 +2,8 @@
 
 
 #include <felspar/coro/coroutine.hpp>
-#include <felspar/exceptions.hpp>
+#include <felspar/exceptions/logic_error.hpp>
+#include <felspar/exceptions/runtime_error.hpp>
 
 #include <optional>
 #include <vector>
