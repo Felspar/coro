@@ -3,12 +3,11 @@
 
 #include <felspar/coro/allocator.hpp>
 #include <felspar/coro/coroutine.hpp>
+#include <felspar/coro/exception.details.hpp>
 #include <felspar/coro/forward.hpp>
-#include <felspar/exceptions.hpp>
 
 #include <exception>
 #include <optional>
-#include <stdexcept>
 
 
 namespace felspar::coro {
@@ -54,7 +53,8 @@ namespace felspar::coro {
         void consume_value() {
             check_exception();
             if (not has_returned) {
-                throw std::runtime_error{"The task hasn't completed"};
+                detail::throw_task_not_completed(
+                        std::source_location::current());
             }
         }
     };
@@ -76,8 +76,8 @@ namespace felspar::coro {
         FELSPAR_CORO_WRAPPER value_type consume_value() {
             check_exception();
             if (not value.has_value()) {
-                throw stdexcept::runtime_error{
-                        "The task hasn't completed with a value "};
+                detail::throw_task_not_completed_with_value(
+                        std::source_location::current());
             }
             value_type rv = std::move(*value);
             value.reset();
@@ -173,8 +173,7 @@ namespace felspar::coro {
                 start(std::source_location const &loc =
                               std::source_location::current()) {
             if (not coro) {
-                throw stdexcept::runtime_error{
-                        "Cannot start an empty task", loc};
+                detail::throw_task_empty(loc);
             } else if (not coro.promise().started) {
                 coro.promise().started = true;
                 coro.resume();
