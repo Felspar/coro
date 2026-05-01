@@ -14,7 +14,8 @@ namespace {
     }
     felspar::coro::stream<integer>
             sieve(integer prime, felspar::coro::stream<integer> sieve) {
-        for (auto checking = prime; auto value = co_await sieve.next();) {
+        auto checking = prime;
+        while (auto value = co_await sieve.next()) {
             while (checking < *value) { checking += prime; }
             if (checking > *value) { co_yield *value; }
         }
@@ -22,8 +23,8 @@ namespace {
 
     felspar::coro::task<int> co_main() {
         integer found{};
-        for (auto primes = numbers(1'000'000);
-             auto prime = co_await primes.next();) {
+        auto primes = numbers(1'000'000);
+        while (auto prime = co_await primes.next()) {
             std::cout << *prime << ' ';
             ++found;
             primes = sieve(*prime, std::move(primes));

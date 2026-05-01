@@ -37,9 +37,8 @@ namespace {
     auto const sint = suite.test("int", [](auto check) {
         [&]() -> felspar::coro::task<void> {
             int expected{};
-            for (auto nums = numbers(5); auto n = co_await nums.next();) {
-                check(*n) == expected++;
-            }
+            auto nums = numbers(5);
+            while (auto n = co_await nums.next()) { check(*n) == expected++; }
         }()
                          .get();
     });
