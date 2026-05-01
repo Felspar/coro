@@ -107,10 +107,7 @@ namespace felspar::coro {
 
 
     template<typename Y, typename Allocator>
-    struct generator_promise : private promise_allocator_impl<Allocator> {
-        using promise_allocator_impl<Allocator>::operator new;
-        using promise_allocator_impl<Allocator>::operator delete;
-
+    struct generator_promise : public promise_allocator_impl<Allocator> {
         memory::holding_pen<Y> value = {};
         std::exception_ptr eptr = {};
 

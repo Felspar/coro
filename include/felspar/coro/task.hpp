@@ -14,10 +14,7 @@ namespace felspar::coro {
 
 
     template<typename Allocator>
-    struct task_promise_base : private promise_allocator_impl<Allocator> {
-        using promise_allocator_impl<Allocator>::operator new;
-        using promise_allocator_impl<Allocator>::operator delete;
-
+    struct task_promise_base : public promise_allocator_impl<Allocator> {
         /// Flag to ensure the coroutine is started at appropriate points in time
         bool started = false;
         /// Any caught exception that needs to be re-thrown is captured here

@@ -20,7 +20,8 @@ namespace {
             sieve(allocator &,
                   integer prime,
                   felspar::coro::stream<integer, allocator> sieve) {
-        for (auto checking = prime; auto value = co_await sieve.next();) {
+        auto checking = prime;
+        while (auto value = co_await sieve.next()) {
             while (checking < *value) { checking += prime; }
             if (checking > *value) { co_yield *value; }
         }
@@ -30,8 +31,8 @@ namespace {
         auto palloc = std::make_unique<allocator>();
         auto &alloc = *palloc;
         integer found{};
-        for (auto primes = numbers(alloc, 1'000'000);
-             auto prime = co_await primes.next();) {
+        auto primes = numbers(alloc, 1'000'000);
+        while (auto prime = co_await primes.next()) {
             std::cout << *prime << ' ';
             ++found;
             primes = sieve(alloc, *prime, std::move(primes));

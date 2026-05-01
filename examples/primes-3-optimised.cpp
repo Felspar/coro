@@ -32,7 +32,8 @@ namespace {
     }
     felspar::coro::stream<integer>
             sieve(integer prime, felspar::coro::stream<integer> sieve) {
-        for (auto checking = prime; auto value = co_await sieve.next();) {
+        auto checking = prime;
+        while (auto value = co_await sieve.next()) {
             while (checking < *value) { checking += prime; }
             if (checking > *value) { co_yield *value; }
         }
@@ -52,8 +53,8 @@ namespace {
          * the way up to my very own fragile prime (thanks Matt Parker)
          * https://youtu.be/p3Khnx0lUDE?t=1682
          */
-        for (auto primes = numbers(694'183'367);
-             auto prime = co_await primes.next();) {
+        auto primes = numbers(694'183'367);
+        while (auto prime = co_await primes.next()) {
             std::cout << *prime << ' ';
             ++found;
             /**
