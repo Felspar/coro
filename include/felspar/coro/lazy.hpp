@@ -22,10 +22,7 @@ namespace felspar::coro {
         lazy &operator=(lazy &&o) = default;
         ~lazy() = default;
 
-        struct promise_type : private promise_allocator_impl<Allocator> {
-            using promise_allocator_impl<Allocator>::operator new;
-            using promise_allocator_impl<Allocator>::operator delete;
-
+        struct promise_type : public promise_allocator_impl<Allocator> {
             std::exception_ptr eptr;
             std::optional<L> value;
             using handle_type = unique_handle<promise_type>;

@@ -43,10 +43,7 @@ namespace felspar::coro {
 
 
     template<typename Y, typename Allocator>
-    struct stream_promise : private promise_allocator_impl<Allocator> {
-        using promise_allocator_impl<Allocator>::operator new;
-        using promise_allocator_impl<Allocator>::operator delete;
-
+    struct stream_promise : public promise_allocator_impl<Allocator> {
         std::coroutine_handle<> continuation = {};
         bool completed = false;
         memory::holding_pen<Y> value = {};
