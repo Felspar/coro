@@ -45,7 +45,12 @@ namespace felspar::coro {
             awaitable(awaitable &&a)
             : owner{a.owner}, mine{std::exchange(a.mine, {})} {}
             ~awaitable() {
-                if (mine) { std::erase(owner.current, mine); }
+                if (mine) {
+                    std::erase(owner.current, mine);
+                    for (auto &h : owner.proc) {
+                        if (h == mine) { h = {}; }
+                    }
+                }
             }
             awaitable &operator=(awaitable &&);
 
@@ -67,7 +72,9 @@ namespace felspar::coro {
         void signal(Value v) {
             value = std::move(v);
             std::swap(current, proc);
-            for (auto &c : proc) { c.resume(); }
+            for (auto &c : proc) {
+                if (c) { c.resume(); }
+            }
             proc.clear();
         }
     };
@@ -96,7 +103,12 @@ namespace felspar::coro {
             awaitable(awaitable &&a)
             : owner{a.owner}, mine{std::exchange(a.mine, {})} {}
             ~awaitable() {
-                if (mine) { std::erase(owner.current, mine); }
+                if (mine) {
+                    std::erase(owner.current, mine);
+                    for (auto &h : owner.proc) {
+                        if (h == mine) { h = {}; }
+                    }
+                }
             }
             awaitable &operator=(awaitable &&);
 
@@ -117,7 +129,9 @@ namespace felspar::coro {
         /// ### Signalling
         void signal() {
             std::swap(current, proc);
-            for (auto &c : proc) { c.resume(); }
+            for (auto &c : proc) {
+                if (c) { c.resume(); }
+            }
             proc.clear();
         }
     };
